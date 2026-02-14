@@ -57,6 +57,7 @@ class PartnersScreen extends StatelessWidget {
                         "Partners",
                         style: TextStyle(
                           fontSize: 22,
+                          fontFamily: "",
                           fontWeight: FontWeight.w600,
                         ),
                       ),
