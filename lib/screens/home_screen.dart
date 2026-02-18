@@ -1,106 +1,216 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../service/api_service.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class HomeScreen extends StatefulWidget {
+  final int? messId;
+
+  const HomeScreen({super.key, this.messId});
 
   @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Color(0xffF5F6FA),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(16, 16, 16, 110),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              /// TITLE
-              Text(
-                "Dashboard",
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-
-              SizedBox(height: 16),
-
-              _RevenueHeaderCard(),
-
-              SizedBox(height: 20),
-
-              _StatsGrid(),
-
-              SizedBox(height: 18),
-
-              _RevenueBoxes(),
-
-              SizedBox(height: 22),
-
-              _MealBreakdownCard(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
+class _HomeScreenState extends State<HomeScreen> {
+  Map<String, dynamic>? stats;
+  bool isLoading = true;
 
+  @override
+  void initState() {
+    super.initState();
+    fetchDashboard();
+  }
 
-/// ================= BIG GREEN REVENUE CARD =================
-class _RevenueHeaderCard extends StatelessWidget {
-  const _RevenueHeaderCard();
+  @override
+  void didUpdateWidget(covariant HomeScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.messId != widget.messId) {
+      setState(() => isLoading = true);
+      fetchDashboard();
+    }
+  }
+
+  Future<void> fetchDashboard() async {
+    try {
+      final data = await ApiService.getDashboardStats(widget.messId);
+
+      setState(() {
+        stats = data["data"] ?? data;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() => isLoading = false);
+      debugPrint("Dashboard Error: $e");
+    }
+  }
+
+  double _toDouble(dynamic value) {
+    if (value == null) return 0;
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0;
+    return 0;
+  }
+
+  int _toInt(dynamic value) {
+    if (value == null) return 0;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
+  }
+
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xff5B9EA3),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: const Column(
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (stats == null) {
+      return const Center(child: Text("No Data Available"));
+    }
+
+    double totalRevenue = _toDouble(stats!["totalRevenue"]);
+    int totalOrders = _toInt(stats!["totalOrders"]);
+    int customers = _toInt(stats!["customers"]);
+    int partners = _toInt(stats!["partners"]);
+    double avgCustomer = _toDouble(stats!["avgPerCustomer"]);
+    double pendingRevenue = _toDouble(stats!["pendingRevenue"]);
+    double breakfast = _toDouble(stats!["breakfast"]);
+    double lunch = _toDouble(stats!["lunch"]);
+
+
+
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 110),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Total Revenue",
-              style: TextStyle(color: Colors.white70, fontSize: 14)),
-          SizedBox(height: 6),
-          Text("₹2800.00",
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold)),
+          const Text(
+            "Dashboard",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          ),
+          const SizedBox(height: 16),
+
+
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: const Color(0xff5B9EA3),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Total Revenue",
+                  style: TextStyle(color: Colors.white70),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  "₹${totalRevenue.toStringAsFixed(2)}",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 2,
+            mainAxisSpacing: 14,
+            crossAxisSpacing: 14,
+            childAspectRatio: 1.15,
+            children: [
+              _StatCard(Icons.shopping_bag_outlined,
+                  "Total Orders", "$totalOrders"),
+              _StatCard(Icons.group_outlined,
+                  "Customers", "$customers"),
+              _StatCard(Icons.delivery_dining_outlined,
+                  "Partners", "$partners"),
+              _StatCard(Icons.currency_rupee,
+                  "Avg/Customer", "₹${avgCustomer.toStringAsFixed(2)}"),
+            ],
+          ),
+
+          const SizedBox(height: 18),
+
+          Row(
+            children: [
+              Expanded(
+                child: _SmallRevenueCard(
+                  "Pending Revenue",
+                  "₹${pendingRevenue.toStringAsFixed(2)}",
+                  const Color(0xffF3D9B8),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _SmallRevenueCard(
+                  "Total Revenue",
+                  "₹${totalRevenue.toStringAsFixed(2)}",
+                  const Color(0xffCDE7D4),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 22),
+
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: Column(
+              children: [
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Meal Type Breakdown",
+                        style: TextStyle(fontWeight: FontWeight.w600)),
+                    Text("Today")
+                  ],
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  height: 160,
+                  child: PieChart(
+                    PieChartData(
+                      sectionsSpace: 3,
+                      centerSpaceRadius: 50,
+                      sections: [
+                        PieChartSectionData(
+                          value: breakfast == 0 ? 1 : breakfast,
+                          color: Colors.cyan,
+                          showTitle: false,
+                        ),
+                        PieChartSectionData(
+                          value: lunch == 0 ? 1 : lunch,
+                          color: Colors.teal,
+                          showTitle: false,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 }
-
-/// ================= EXACT WHITE CARDS GRID =================
-class _StatsGrid extends StatelessWidget {
-  const _StatsGrid();
-
-  @override
-  Widget build(BuildContext context) {
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
-      mainAxisSpacing: 14,
-      crossAxisSpacing: 14,
-      childAspectRatio: 1.15,
-      children: const [
-        _StatCard(Icons.shopping_bag_outlined, "Total Orders", "1"),
-        _StatCard(Icons.group_outlined, "Customers", "1"),
-        _StatCard(Icons.delivery_dining_outlined, "Partners", "2"),
-        _StatCard(Icons.currency_rupee, "Avg/Customer", "₹2800.00"),
-      ],
-    );
-  }
-}
-
 class _StatCard extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -143,34 +253,6 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-/// ================= BOTTOM SMALL REVENUE BOXES =================
-class _RevenueBoxes extends StatelessWidget {
-  const _RevenueBoxes();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Row(
-      children: [
-        Expanded(
-          child: _SmallRevenueCard(
-            "Pending Revenue",
-            "₹0.00",
-            Color(0xffF3D9B8),
-          ),
-        ),
-        SizedBox(width: 12),
-        Expanded(
-          child: _SmallRevenueCard(
-            "Total Revenue",
-            "₹2800.00",
-            Color(0xffCDE7D4),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _SmallRevenueCard extends StatelessWidget {
   final String title;
   final String value;
@@ -182,112 +264,24 @@ class _SmallRevenueCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration:
-      BoxDecoration(color: color, borderRadius: BorderRadius.circular(18)),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(18),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title),
           const SizedBox(height: 6),
-          Text(value,
-              style:
-              const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-        ],
-      ),
-    );
-  }
-}
-
-/// ================= pie chart=================
-class _MealBreakdownCard extends StatelessWidget {
-  const _MealBreakdownCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: Column(
-        children: [
-
-          /// header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                "Meal Type Breakdown",
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-              Container(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Text("Feb 12, 2026"),
-              )
-            ],
-          ),
-
-          const SizedBox(height: 20),
-
-          /// donut
-          SizedBox(
-            height: 160,
-            child: PieChart(
-              PieChartData(
-                sectionsSpace: 3,
-                centerSpaceRadius: 50,
-                sections: [
-                  PieChartSectionData(
-                      value: 65, color: Colors.cyan, showTitle: false),
-                  PieChartSectionData(
-                      value: 35, color: Colors.teal, showTitle: false),
-                ],
-              ),
+          Text(
+            value,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
             ),
           ),
-
-          const SizedBox(height: 10),
-
-          /// legend
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _LegendDot(Colors.cyan, "Breakfast"),
-              SizedBox(width: 20),
-              _LegendDot(Colors.teal, "Lunch"),
-            ],
-          )
         ],
       ),
-    );
-  }
-}
-
-class _LegendDot extends StatelessWidget {
-  final Color color;
-  final String label;
-
-  const _LegendDot(this.color, this.label);
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          width: 10,
-          height: 10,
-          decoration:
-          BoxDecoration(color: color, shape: BoxShape.circle),
-        ),
-        const SizedBox(width: 6),
-        Text(label),
-      ],
     );
   }
 }

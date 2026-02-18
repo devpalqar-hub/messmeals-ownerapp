@@ -4,7 +4,9 @@ import 'customer_details_screen.dart';
 
 
 class CustomersScreen extends StatelessWidget {
-  CustomersScreen({super.key});
+  final int? messId;
+
+   CustomersScreen({super.key, this.messId});
 
   final List<Map<String, String>> customers = [
     {
@@ -48,7 +50,6 @@ class CustomersScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
 
-              /// ---------------- HEADER ----------------
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -92,7 +93,6 @@ class CustomersScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              /// ---------------- SEARCH + FILTER ----------------
               Row(
                 children: [
                   Expanded(
@@ -132,7 +132,6 @@ class CustomersScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              /// ---------------- LIST ----------------
               Expanded(
                 child: ListView.builder(
                   itemCount: customers.length,
@@ -185,7 +184,6 @@ class CustomerCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
 
-          /// Name + icons
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -218,7 +216,6 @@ class CustomerCard extends StatelessWidget {
           const Divider(),
           const SizedBox(height: 12),
 
-          /// Bottom Info
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

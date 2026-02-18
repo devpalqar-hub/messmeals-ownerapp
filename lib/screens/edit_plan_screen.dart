@@ -45,13 +45,9 @@ class _EditPlanScreenState extends State<EditPlanScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xffF5F6FA),
-
-      /// APPBAR
       appBar: AppBar(
         title: const Text("Edit Plan"),
       ),
-
-      /// BODY
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(

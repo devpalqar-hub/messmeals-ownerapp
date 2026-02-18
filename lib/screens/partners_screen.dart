@@ -4,7 +4,10 @@ import 'partner_details_screen.dart';
 
 
 class PartnersScreen extends StatelessWidget {
-  PartnersScreen({super.key});
+  final int? messId;
+
+   PartnersScreen({super.key, this.messId});
+
 
   final List<Map<String, dynamic>> partners = [
     {
@@ -38,7 +41,6 @@ class PartnersScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xffF5F6FA),
 
-      /// ---------------- HEADER ----------------
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -46,7 +48,6 @@ class PartnersScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
 
-              /// Title + Add
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -95,7 +96,6 @@ class PartnersScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              /// Search bar
               TextField(
                 decoration: InputDecoration(
                   hintText: "Search customers...",
@@ -113,7 +113,6 @@ class PartnersScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              /// List
               Expanded(
                 child: ListView.builder(
                   itemCount: partners.length,
@@ -167,8 +166,6 @@ class PartnerCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-          /// Name + Badge + Icons
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -182,8 +179,6 @@ class PartnerCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-
-                  /// Badge
                   Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10, vertical: 4),
@@ -233,7 +228,6 @@ class PartnerCard extends StatelessWidget {
           const Divider(),
           const SizedBox(height: 8),
 
-          /// Bottom Info
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [

@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class DeliveriesScreen extends StatefulWidget {
-  const DeliveriesScreen({super.key});
+  final int? messId;
+
+  const DeliveriesScreen({super.key, this.messId});
 
   @override
   State<DeliveriesScreen> createState() => _DeliveriesScreenState();
@@ -24,8 +26,8 @@ class _DeliveriesScreenState extends State<DeliveriesScreen> {
     },
   ];
 
-  /// ================= DATE PICKER =================
-  Future pickDate() async {
+
+  Future<void> pickDate() async {
     final picked = await showDatePicker(
       context: context,
       firstDate: DateTime(2024),
@@ -34,11 +36,12 @@ class _DeliveriesScreenState extends State<DeliveriesScreen> {
     );
 
     if (picked != null) {
-      setState(() => selectedDate = picked);
+      setState(() {
+        selectedDate = picked;
+      });
     }
   }
 
-  /// ================= GENERATE SHEET =================
   void openGenerateSheet() {
     showModalBottomSheet(
       context: context,
@@ -100,19 +103,31 @@ class _DeliveriesScreenState extends State<DeliveriesScreen> {
     );
   }
 
-  /// ================= UI =================
   @override
   Widget build(BuildContext context) {
+
+    // If no mess selected
+    if (widget.messId == null) {
+      return const Center(
+        child: Text(
+          "Please select a mess",
+          style: TextStyle(fontSize: 16),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xffF5F6FA),
 
-      /// ================= APPBAR =================
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         title: const Text(
           "Deliveries",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         actions: [
           Padding(
@@ -126,15 +141,14 @@ class _DeliveriesScreenState extends State<DeliveriesScreen> {
         ],
       ),
 
-      /// ================= BODY =================
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            /// FILTER ROW
+
             Row(
               children: [
-                /// STATUS DROPDOWN
+
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     value: selectedStatus,
@@ -151,17 +165,21 @@ class _DeliveriesScreenState extends State<DeliveriesScreen> {
                       ),
                     )
                         .toList(),
-                    onChanged: (v) => setState(() => selectedStatus = v!),
+                    onChanged: (v) {
+                      setState(() {
+                        selectedStatus = v!;
+                      });
+                    },
                     decoration: const InputDecoration(
                       filled: true,
                       fillColor: Colors.white,
+                      border: OutlineInputBorder(),
                     ),
                   ),
                 ),
 
                 const SizedBox(width: 10),
 
-                /// DATE BUTTON
                 Expanded(
                   child: GestureDetector(
                     onTap: pickDate,
@@ -170,11 +188,15 @@ class _DeliveriesScreenState extends State<DeliveriesScreen> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey.shade300),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(DateFormat('dd MMM yyyy').format(selectedDate)),
+                          Text(
+                            DateFormat('dd MMM yyyy')
+                                .format(selectedDate),
+                          ),
                           const Icon(Icons.calendar_today)
                         ],
                       ),
@@ -185,8 +207,6 @@ class _DeliveriesScreenState extends State<DeliveriesScreen> {
             ),
 
             const SizedBox(height: 20),
-
-            /// DELIVERY LIST
             Expanded(
               child: ListView.builder(
                 itemCount: deliveries.length,
@@ -196,7 +216,7 @@ class _DeliveriesScreenState extends State<DeliveriesScreen> {
                     onToggle: () {
                       setState(() {
                         deliveries[index]["expanded"] =
-                        !deliveries[index]["expanded"];
+                        !(deliveries[index]["expanded"] ?? false);
                       });
                     },
                   );
@@ -218,9 +238,6 @@ class _DeliveriesScreenState extends State<DeliveriesScreen> {
 
 
 
-/// =====================================================
-/// DELIVERY CARD
-/// =====================================================
 
 class DeliveryCard extends StatelessWidget {
   final Map<String, dynamic> delivery;
@@ -234,7 +251,7 @@ class DeliveryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final expanded = delivery["expanded"] == true;
+    final bool expanded = delivery["expanded"] == true;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -245,20 +262,27 @@ class DeliveryCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          /// BASIC INFO
+
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Chip(
                     label: Text(delivery["status"]),
                     backgroundColor: Colors.black,
-                    labelStyle: const TextStyle(color: Colors.white),
+                    labelStyle:
+                    const TextStyle(color: Colors.white),
                   ),
-                  Text(delivery["name"],
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 6),
+                  Text(
+                    delivery["name"],
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   Text(delivery["phone"]),
                   Text(delivery["address"]),
                 ],
@@ -281,7 +305,6 @@ class DeliveryCard extends StatelessWidget {
             ],
           ),
 
-          /// EXPANDED ACTIONS
           if (expanded) ...[
             const Divider(),
 

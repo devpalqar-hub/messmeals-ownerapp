@@ -19,7 +19,6 @@ class PartnerDetailsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xffF5F6FA),
 
-      /// ================= APP BAR =================
       appBar: AppBar(
         backgroundColor: const Color(0xffF5F6FA),
         elevation: 0,
@@ -46,8 +45,6 @@ class PartnerDetailsScreen extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-        
-              /// ================= PROFILE CARD =================
               _card(
                 child: Row(
                   children: [
@@ -76,8 +73,7 @@ class PartnerDetailsScreen extends StatelessWidget {
               ),
         
               const SizedBox(height: 16),
-        
-              /// ================= STATS GRID =================
+
               Row(
                 children: [
                   _statCard("Completed", "1231", Icons.check_circle,
@@ -101,8 +97,7 @@ class PartnerDetailsScreen extends StatelessWidget {
               ),
         
               const SizedBox(height: 16),
-        
-              /// ================= PERFORMANCE =================
+
               _card(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,8 +143,7 @@ class PartnerDetailsScreen extends StatelessWidget {
               ),
         
               const SizedBox(height: 16),
-        
-              /// ================= RECENT DELIVERIES =================
+
               _card(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,7 +165,6 @@ class PartnerDetailsScreen extends StatelessWidget {
     );
   }
 
-  /// ================= COMMON WIDGETS =================
 
   Widget _card({required Widget child}) {
     return Container(
@@ -216,7 +209,6 @@ class PartnerDetailsScreen extends StatelessWidget {
   }
 }
 
-/// mini stat
 class _miniStat extends StatelessWidget {
   final String value;
   final String label;
@@ -236,7 +228,6 @@ class _miniStat extends StatelessWidget {
   }
 }
 
-/// delivery row
 class _deliveryRow extends StatelessWidget {
   final String status;
   final String title;

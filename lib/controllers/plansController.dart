@@ -5,6 +5,8 @@ import 'package:get/state_manager.dart';
 import 'package:http/http.dart';
 import 'package:messmeals/main.dart';
 import 'package:messmeals/models/mess_plan_model.dart';
+import '../service/api_service.dart';
+
 
 class Planscontroller extends GetxController {
   List<MessPlanModel> messPlanList = [];
@@ -22,7 +24,7 @@ class Planscontroller extends GetxController {
 
     isMessPlanLoading = true;
     update();
-    var response = await get(Uri.parse(baseUrl + "/plans?page=1&limit=30"));
+    var response = await get(Uri.parse(ApiService.baseUrl + "/plans?page=1&limit=30"));
     if (response.statusCode == 200) {
       var messPlans = json.decode(response.body);
       for (var data in messPlans["data"]) {

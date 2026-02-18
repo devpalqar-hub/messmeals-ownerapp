@@ -8,9 +8,10 @@ import 'add_plan_screen.dart';
 import 'edit_plan_screen.dart';
 
 class PlansScreen extends StatelessWidget {
-  PlansScreen({super.key});
+  final int? messId;
 
-  /// ------------------ DATA ------------------
+   PlansScreen({super.key, this.messId});
+
   final List<Map<String, dynamic>> plans = [
     {
       "title": "Basic Plan",
@@ -35,7 +36,6 @@ class PlansScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xffF5F6FA),
 
-      /// ================ APPBAR =================
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -68,7 +68,6 @@ class PlansScreen extends StatelessWidget {
         ],
       ),
 
-      /// ================= BODY =================
       body: SafeArea(
         child: GetBuilder<Planscontroller>(builder: (__) {
           return Padding(
@@ -78,7 +77,6 @@ class PlansScreen extends StatelessWidget {
                 : SingleChildScrollView(
                     child: Column(
                       children: [
-                        /// 🔍 SEARCH
                         TextField(
                           decoration: InputDecoration(
                             hintText: "Search plans...",
@@ -95,7 +93,6 @@ class PlansScreen extends StatelessWidget {
                         const SizedBox(height: 20),
                         for (var data in __.messPlanList) PlanCard(plan: data)
 
-                        /// 📋 LIST
                       ],
                     ),
                   ),
@@ -127,7 +124,6 @@ class PlanCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// TITLE + PRICE
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -152,7 +148,6 @@ class PlanCard extends StatelessWidget {
 
           const SizedBox(height: 8),
 
-          /// DESCRIPTION
           Text(plan.description ?? "",
               style: const TextStyle(color: Colors.grey)),
 
@@ -161,7 +156,6 @@ class PlanCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              /// MEAL TAGS (LEFT SIDE)
               Expanded(
                 child: Wrap(
                   spacing: 6,
@@ -185,7 +179,6 @@ class PlanCard extends StatelessWidget {
                 ),
               ),
 
-              /// EDIT + DELETE (RIGHT SIDE)
               Row(
                 children: [
                   IconButton(
