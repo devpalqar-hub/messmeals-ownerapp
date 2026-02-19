@@ -8,9 +8,9 @@ import 'add_plan_screen.dart';
 import 'edit_plan_screen.dart';
 
 class PlansScreen extends StatelessWidget {
-  final int? messId;
+  final String? messId;
 
-   PlansScreen({super.key, this.messId});
+  PlansScreen({super.key, this.messId});
 
   final List<Map<String, dynamic>> plans = [
     {
@@ -35,7 +35,6 @@ class PlansScreen extends StatelessWidget {
     controller.fetchMessPlan();
     return Scaffold(
       backgroundColor: const Color(0xffF5F6FA),
-
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -67,7 +66,6 @@ class PlansScreen extends StatelessWidget {
           )
         ],
       ),
-
       body: SafeArea(
         child: GetBuilder<Planscontroller>(builder: (__) {
           return Padding(
@@ -89,10 +87,8 @@ class PlansScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-
                         const SizedBox(height: 20),
                         for (var data in __.messPlanList) PlanCard(plan: data)
-
                       ],
                     ),
                   ),
@@ -145,14 +141,10 @@ class PlanCard extends StatelessWidget {
               )
             ],
           ),
-
           const SizedBox(height: 8),
-
           Text(plan.description ?? "",
               style: const TextStyle(color: Colors.grey)),
-
           const SizedBox(height: 10),
-
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -178,7 +170,6 @@ class PlanCard extends StatelessWidget {
                       .toList(),
                 ),
               ),
-
               Row(
                 children: [
                   IconButton(

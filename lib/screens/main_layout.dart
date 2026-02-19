@@ -18,7 +18,7 @@ class _MainLayoutState extends State<MainLayout> {
   int selectedIndex = 0;
 
   List<dynamic> messList = [];
-  int? selectedMessId;
+  String? selectedMessId;
   bool isLoadingMess = true;
 
   @override
@@ -36,7 +36,6 @@ class _MainLayoutState extends State<MainLayout> {
         messList = data;
         isLoadingMess = false;
       });
-
     } catch (e) {
       setState(() {
         isLoadingMess = false;
@@ -47,12 +46,12 @@ class _MainLayoutState extends State<MainLayout> {
 
   /// ================= SCREENS =================
   List<Widget> get screens => [
-    HomeScreen(messId: selectedMessId),
-    CustomersScreen(messId: selectedMessId),
-    PartnersScreen(messId: selectedMessId),
-    DeliveriesScreen(messId: selectedMessId),
-    PlansScreen(messId: selectedMessId),
-  ];
+        HomeScreen(messId: selectedMessId),
+        CustomersScreen(messId: selectedMessId),
+        PartnersScreen(messId: selectedMessId),
+        DeliveriesScreen(messId: selectedMessId),
+        PlansScreen(messId: selectedMessId),
+      ];
 
   @override
   Widget build(BuildContext context) {
@@ -77,45 +76,45 @@ class _MainLayoutState extends State<MainLayout> {
             padding: const EdgeInsets.only(right: 12),
             child: isLoadingMess
                 ? const SizedBox(
-              width: 24,
-              height: 24,
-              child: Padding(
-                padding: EdgeInsets.all(4.0),
-                child: CircularProgressIndicator(strokeWidth: 2),
-              ),
-            )
-                : DropdownButtonHideUnderline(
-              child: DropdownButton<int>(
-                hint: const Text(
-                  "Select Mess",
-                  style: TextStyle(color: Colors.black),
-                ),
-                value: selectedMessId,
-                icon: const Icon(Icons.arrow_drop_down,
-                    color: Colors.black),
-
-                /// ✅ SAFE INT CONVERSION
-                items: messList.map<DropdownMenuItem<int>>((mess) {
-                  final id = (mess["id"] as num?)?.toInt();
-
-                  return DropdownMenuItem<int>(
-                    value: id,
-                    child: Text(
-                      mess["name"]?.toString() ?? "Mess",
+                    width: 24,
+                    height: 24,
+                    child: Padding(
+                      padding: EdgeInsets.all(4.0),
+                      child: CircularProgressIndicator(strokeWidth: 2),
                     ),
-                  );
-                }).toList(),
+                  )
+                : DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      hint: const Text(
+                        "Select Mess",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      value: selectedMessId,
+                      icon: const Icon(Icons.arrow_drop_down,
+                          color: Colors.black),
 
-                onChanged: (value) {
-                  setState(() {
-                    selectedMessId = value;
-                    selectedIndex = 0; // Reset to Home
-                  });
+                      /// ✅ SAFE INT CONVERSION
+                      items: messList.map<DropdownMenuItem<String>>((mess) {
+                        final id = mess["id"];
 
-                  debugPrint("Selected Mess ID: $value");
-                },
-              ),
-            ),
+                        return DropdownMenuItem<String>(
+                          value: id,
+                          child: Text(
+                            mess["name"]?.toString() ?? "Mess",
+                          ),
+                        );
+                      }).toList(),
+
+                      onChanged: (value) {
+                        setState(() {
+                          selectedMessId = value;
+                          selectedIndex = 0; // Reset to Home
+                        });
+
+                        debugPrint("Selected Mess ID: $value");
+                      },
+                    ),
+                  ),
           )
         ],
       ),
@@ -126,8 +125,7 @@ class _MainLayoutState extends State<MainLayout> {
       /// ================= BOTTOM NAV =================
       bottomNavigationBar: SafeArea(
         child: Container(
-          margin:
-          const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
             color: const Color(0xff121826),
@@ -162,8 +160,7 @@ class _MainLayoutState extends State<MainLayout> {
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
-            color:
-            isSelected ? const Color(0xff2F6FED) : Colors.transparent,
+            color: isSelected ? const Color(0xff2F6FED) : Colors.transparent,
             borderRadius: BorderRadius.circular(14),
           ),
           child: Column(

@@ -153,7 +153,7 @@ class ApiService {
 
   // ================= DASHBOARD =================
   static Future<Map<String, dynamic>> getDashboardStats(
-      int? messId) async {
+      String? messId) async {
     String endpoint = "/auth/stats";
 
     if (messId != null) {

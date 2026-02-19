@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class DeliveriesScreen extends StatefulWidget {
-  final int? messId;
+  final String? messId;
 
   const DeliveriesScreen({super.key, this.messId});
 
@@ -25,7 +25,6 @@ class _DeliveriesScreenState extends State<DeliveriesScreen> {
       "expanded": false,
     },
   ];
-
 
   Future<void> pickDate() async {
     final picked = await showDatePicker(
@@ -59,15 +58,12 @@ class _DeliveriesScreenState extends State<DeliveriesScreen> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 16),
-
               ListTile(
                 title: const Text("Select date"),
                 trailing: const Icon(Icons.calendar_today),
                 onTap: pickDate,
               ),
-
               const SizedBox(height: 14),
-
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
@@ -78,9 +74,7 @@ class _DeliveriesScreenState extends State<DeliveriesScreen> {
                   "This will create delivery records for all active customers.",
                 ),
               ),
-
               const SizedBox(height: 20),
-
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 45),
@@ -91,7 +85,6 @@ class _DeliveriesScreenState extends State<DeliveriesScreen> {
                 },
                 child: const Text("Generate"),
               ),
-
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: const Text("Cancel"),
@@ -105,7 +98,6 @@ class _DeliveriesScreenState extends State<DeliveriesScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     // If no mess selected
     if (widget.messId == null) {
       return const Center(
@@ -118,7 +110,6 @@ class _DeliveriesScreenState extends State<DeliveriesScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xffF5F6FA),
-
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -140,31 +131,24 @@ class _DeliveriesScreenState extends State<DeliveriesScreen> {
           )
         ],
       ),
-
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-
             Row(
               children: [
-
                 Expanded(
                   child: DropdownButtonFormField<String>(
                     value: selectedStatus,
-                    items: const [
-                      "All Status",
-                      "Pending",
-                      "Progress",
-                      "Delivered"
-                    ]
-                        .map(
-                          (e) => DropdownMenuItem(
-                        value: e,
-                        child: Text(e),
-                      ),
-                    )
-                        .toList(),
+                    items:
+                        const ["All Status", "Pending", "Progress", "Delivered"]
+                            .map(
+                              (e) => DropdownMenuItem(
+                                value: e,
+                                child: Text(e),
+                              ),
+                            )
+                            .toList(),
                     onChanged: (v) {
                       setState(() {
                         selectedStatus = v!;
@@ -177,9 +161,7 @@ class _DeliveriesScreenState extends State<DeliveriesScreen> {
                     ),
                   ),
                 ),
-
                 const SizedBox(width: 10),
-
                 Expanded(
                   child: GestureDetector(
                     onTap: pickDate,
@@ -194,8 +176,7 @@ class _DeliveriesScreenState extends State<DeliveriesScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            DateFormat('dd MMM yyyy')
-                                .format(selectedDate),
+                            DateFormat('dd MMM yyyy').format(selectedDate),
                           ),
                           const Icon(Icons.calendar_today)
                         ],
@@ -205,7 +186,6 @@ class _DeliveriesScreenState extends State<DeliveriesScreen> {
                 )
               ],
             ),
-
             const SizedBox(height: 20),
             Expanded(
               child: ListView.builder(
@@ -216,7 +196,7 @@ class _DeliveriesScreenState extends State<DeliveriesScreen> {
                     onToggle: () {
                       setState(() {
                         deliveries[index]["expanded"] =
-                        !(deliveries[index]["expanded"] ?? false);
+                            !(deliveries[index]["expanded"] ?? false);
                       });
                     },
                   );
@@ -229,15 +209,6 @@ class _DeliveriesScreenState extends State<DeliveriesScreen> {
     );
   }
 }
-
-
-
-
-
-
-
-
-
 
 class DeliveryCard extends StatelessWidget {
   final Map<String, dynamic> delivery;
@@ -262,19 +233,16 @@ class DeliveryCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Chip(
                     label: Text(delivery["status"]),
                     backgroundColor: Colors.black,
-                    labelStyle:
-                    const TextStyle(color: Colors.white),
+                    labelStyle: const TextStyle(color: Colors.white),
                   ),
                   const SizedBox(height: 6),
                   Text(
@@ -287,7 +255,6 @@ class DeliveryCard extends StatelessWidget {
                   Text(delivery["address"]),
                 ],
               ),
-
               Column(
                 children: [
                   Text(delivery["price"]),
@@ -304,10 +271,8 @@ class DeliveryCard extends StatelessWidget {
               )
             ],
           ),
-
           if (expanded) ...[
             const Divider(),
-
             Row(
               children: [
                 Expanded(

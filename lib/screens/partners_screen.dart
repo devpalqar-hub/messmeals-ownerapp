@@ -4,7 +4,7 @@ import 'partner_details_screen.dart';
 
 
 class PartnersScreen extends StatelessWidget {
-  final int? messId;
+  final String? messId;
 
    PartnersScreen({super.key, this.messId});
 

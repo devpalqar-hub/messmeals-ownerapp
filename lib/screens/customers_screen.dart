@@ -4,7 +4,7 @@ import 'customer_details_screen.dart';
 
 
 class CustomersScreen extends StatelessWidget {
-  final int? messId;
+  final String? messId;
 
    CustomersScreen({super.key, this.messId});
 

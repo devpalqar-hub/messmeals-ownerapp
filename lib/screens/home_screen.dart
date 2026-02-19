@@ -3,7 +3,7 @@ import 'package:fl_chart/fl_chart.dart';
 import '../service/api_service.dart';
 
 class HomeScreen extends StatefulWidget {
-  final int? messId;
+  final String? messId;
 
   const HomeScreen({super.key, this.messId});
 
