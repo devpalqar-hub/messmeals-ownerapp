@@ -27,7 +27,21 @@ class ApiService {
     await storage.delete(key: "accessToken");
   }
 
-  /// ================= COMMON REQUESTS =================
+  /// ================= RESPONSE HANDLER =================
+  static Map<String, dynamic> _handleResponse(http.Response response) {
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return data;
+    } else if (response.statusCode == 401) {
+      logout();
+      throw Exception("Session expired");
+    } else {
+      throw Exception(data["message"] ?? "Request Failed");
+    }
+  }
+
+  /// ================= BASIC REQUESTS =================
   static Future<Map<String, dynamic>> authorizedGet(String endpoint) async {
     final token = await getToken();
 
@@ -78,19 +92,6 @@ class ApiService {
     }
   }
 
-  static Map<String, dynamic> _handleResponse(http.Response response) {
-    final data = jsonDecode(response.body);
-
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      return data;
-    } else if (response.statusCode == 401) {
-      logout();
-      throw Exception("Session expired");
-    } else {
-      throw Exception(data["message"] ?? "Request Failed");
-    }
-  }
-
   /// ================= AUTH =================
   static Future<Map<String, dynamic>> login(String phone) async {
     return await authorizedPost("/auth/login", {"phone": phone});
@@ -109,8 +110,8 @@ class ApiService {
   }
 
   /// ================= DASHBOARD =================
-  static Future<Map<String, dynamic>> getDashboardStats(String s) async {
-    return await authorizedGet("/dashboard");
+  static Future<Map<String, dynamic>> getDashboardStats(String messId) async {
+    return await authorizedGet("/dashboard?messId=$messId");
   }
 
   /// ================= MESSES =================
@@ -145,13 +146,21 @@ class ApiService {
 
   /// ================= DELIVERY AGENTS =================
   static Future<Map<String, dynamic>> getPartners(String messId) async {
-    return await authorizedGet(
-        "/delivery-agent?page=1&limit=10&messId=$messId");
+    return await authorizedGet("/delivery-agent?page=1&limit=10&messId=$messId");
   }
 
   static Future<Map<String, dynamic>> addPartner(
       Map<String, dynamic> body) async {
     return await authorizedPost("/delivery-agent", body);
+  }
+
+  static Future<Map<String, dynamic>> updatePartner(
+      String id, Map<String, dynamic> body) async {
+    return await authorizedPatch("/delivery-agent/$id", body);
+  }
+
+  static Future<void> deletePartner(String id) async {
+    await authorizedDelete("/delivery-agent/$id");
   }
 
   static Future<dynamic> sendLoginOtp(String phone) async {}

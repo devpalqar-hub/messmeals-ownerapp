@@ -10,7 +10,7 @@ class AuthController extends GetxController {
     try {
       isLoading.value = true;
 
-      final data = await ApiService.login(phone);
+      final data = await ApiService.sendLoginOtp(phone);
 
       phoneNumber.value = phone;
 
