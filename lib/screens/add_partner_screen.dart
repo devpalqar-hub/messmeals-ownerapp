@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AddPartnerScreen extends StatelessWidget {
-  const AddPartnerScreen({super.key});
+  const AddPartnerScreen({super.key, String? messId});
 
   @override
   Widget build(BuildContext context) {

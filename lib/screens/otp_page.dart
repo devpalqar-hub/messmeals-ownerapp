@@ -24,12 +24,14 @@ class _OtpPageState extends State<OtpPage> {
     final args = Get.arguments;
 
     if (args == null) {
-      Get.offAllNamed("/login");
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.offAllNamed("/login");
+      });
       return;
     }
 
     phone = args["phone"];
-    sessionId = args["sessionId"];
+    sessionId = args["sessionId"]; // (kept if needed later)
   }
 
   Future<void> verifyOtp() async {
@@ -48,9 +50,8 @@ class _OtpPageState extends State<OtpPage> {
       setState(() => isLoading = true);
 
       await ApiService.verifyOtp(
-        phone: phone,
-        sessionId: sessionId,
-        otp: otp,
+        phone,
+        otp,
       );
 
       Get.offAllNamed("/main");
@@ -86,7 +87,7 @@ class _OtpPageState extends State<OtpPage> {
               borderRadius: BorderRadius.circular(15),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                 )
               ],
@@ -94,7 +95,6 @@ class _OtpPageState extends State<OtpPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-
                 Container(
                   height: 50,
                   width: 50,
@@ -109,10 +109,7 @@ class _OtpPageState extends State<OtpPage> {
 
                 const Text(
                   "SuperMeals Admin",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
 
                 const SizedBox(height: 5),
@@ -141,7 +138,6 @@ class _OtpPageState extends State<OtpPage> {
 
                 const SizedBox(height: 20),
 
-
                 SizedBox(
                   width: double.infinity,
                   height: 45,
@@ -154,9 +150,7 @@ class _OtpPageState extends State<OtpPage> {
                     ),
                     onPressed: isLoading ? null : verifyOtp,
                     child: isLoading
-                        ? const CircularProgressIndicator(
-                      color: Colors.white,
-                    )
+                        ? const CircularProgressIndicator(color: Colors.white)
                         : const Text("Verify"),
                   ),
                 ),
@@ -164,9 +158,7 @@ class _OtpPageState extends State<OtpPage> {
                 const SizedBox(height: 15),
 
                 TextButton(
-                  onPressed: () {
-                    Get.back();
-                  },
+                  onPressed: () => Get.back(),
                   child: const Text("Change Phone Number"),
                 ),
               ],

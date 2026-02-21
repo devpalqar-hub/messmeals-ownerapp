@@ -1,43 +1,33 @@
-import 'dart:convert';
-
-import 'package:flutter/material.dart';
-import 'package:get/state_manager.dart';
-import 'package:http/http.dart';
-import 'package:messmeals/main.dart';
-import 'package:messmeals/models/mess_plan_model.dart';
+import 'package:get/get.dart';
+import '../models/mess_plan_model.dart';
 import '../service/api_service.dart';
 
-
-class Planscontroller extends GetxController {
+class PlansController extends GetxController {
   List<MessPlanModel> messPlanList = [];
-  TextEditingController planNameController = TextEditingController();
+  bool isMessPlanLoading = false;
 
-  TextEditingController planPriceController = TextEditingController();
-  TextEditingController planDiscountController = TextEditingController();
-  TextEditingController planDescriptionController = TextEditingController();
-  List<String> selectedPlanVaritation = [];
+  /// ⭐ FETCH PLANS WITH MESS ID
+  Future<void> fetchMessPlan(String messId) async {
+    try {
+      messPlanList.clear();
+      isMessPlanLoading = true;
+      update();
 
-  bool isMessPlanLoading = true;
+      final response = await ApiService.getPlans(messId);
 
-  fetchMessPlan() async {
-    messPlanList = [];
-
-    isMessPlanLoading = true;
-    update();
-    var response = await get(Uri.parse(ApiService.baseUrl + "/plans?page=1&limit=30"));
-    if (response.statusCode == 200) {
-      var messPlans = json.decode(response.body);
-      for (var data in messPlans["data"]) {
-        messPlanList.add(MessPlanModel.fromJson(data));
+      if (response["data"] != null) {
+        for (var data in response["data"]) {
+          messPlanList.add(MessPlanModel.fromJson(data));
+        }
       }
 
       isMessPlanLoading = false;
       update();
-      update();
-    }
-  }
 
-  addMessPlan() {
-    fetchMessPlan();
+    } catch (e) {
+      isMessPlanLoading = false;
+      update();
+      print("Plans error: $e");
+    }
   }
 }

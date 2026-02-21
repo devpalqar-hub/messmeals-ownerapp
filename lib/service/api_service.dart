@@ -6,6 +6,7 @@ class ApiService {
   static const String baseUrl = "https://api.messmeals.com";
   static const FlutterSecureStorage storage = FlutterSecureStorage();
 
+  /// ================= HEADERS =================
   static Map<String, String> _headers({String? token}) {
     return {
       "Content-Type": "application/json",
@@ -13,128 +14,34 @@ class ApiService {
     };
   }
 
-  // ================= NORMAL LOGIN =================
-  static Future<Map<String, dynamic>> login(
-      String email,
-      String password,
-      ) async {
-    final response = await http.post(
-      Uri.parse("$baseUrl/auth/login"),
-      headers: _headers(),
-      body: jsonEncode({
-        "email": email,
-        "password": password,
-      }),
-    );
-
-    final data = jsonDecode(response.body);
-
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      final token = data["accessToken"] ?? data["token"];
-
-      if (token != null) {
-        await storage.write(key: "accessToken", value: token.toString());
-      }
-
-      return data;
-    } else {
-      throw Exception(data["message"] ?? "Login Failed");
-    }
-  }
-
-  // ================= LOGIN OTP =================
-  static Future<Map<String, dynamic>> sendLoginOtp(String phone) async {
-    final response = await http.post(
-      Uri.parse("$baseUrl/auth/send-login-otp"),
-      headers: _headers(),
-      body: jsonEncode({"phone": phone}),
-    );
-
-    final data = jsonDecode(response.body);
-
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      return data;
-    } else {
-      throw Exception(data["message"] ?? "Failed to send OTP");
-    }
-  }
-
-  // ================= VERIFY OTP =================
-  static Future<void> verifyOtp({
-    required String phone,
-    required String sessionId,
-    required String otp,
-  }) async {
-    final response = await http.post(
-      Uri.parse("$baseUrl/auth/verify-otp"),
-      headers: _headers(),
-      body: jsonEncode({
-        "phone": phone,
-        "sessionId": sessionId,
-        "otp": otp,
-      }),
-    );
-
-    final data = jsonDecode(response.body);
-
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      final token = data["accessToken"] ?? data["token"];
-
-      if (token != null) {
-        await storage.write(key: "accessToken", value: token.toString());
-      } else {
-        throw Exception("Token not received from server");
-      }
-    } else {
-      throw Exception(data["message"] ?? "OTP Verification Failed");
-    }
-  }
-
-  // ================= TOKEN =================
+  /// ================= TOKEN =================
   static Future<String?> getToken() async {
     return await storage.read(key: "accessToken");
+  }
+
+  static Future<void> saveToken(String token) async {
+    await storage.write(key: "accessToken", value: token);
   }
 
   static Future<void> logout() async {
     await storage.delete(key: "accessToken");
   }
 
-  // ================= AUTHORIZED GET =================
-  static Future<Map<String, dynamic>> authorizedGet(
-      String endpoint) async {
+  /// ================= COMMON REQUESTS =================
+  static Future<Map<String, dynamic>> authorizedGet(String endpoint) async {
     final token = await getToken();
-
-    if (token == null) {
-      throw Exception("Token not found. Please login again.");
-    }
 
     final response = await http.get(
       Uri.parse("$baseUrl$endpoint"),
       headers: _headers(token: token),
     );
 
-    final data = jsonDecode(response.body);
-
-    if (response.statusCode == 200) {
-      return data;
-    } else if (response.statusCode == 401) {
-      await logout();
-      throw Exception("Session expired. Please login again.");
-    } else {
-      throw Exception(data["message"] ?? "Request Failed");
-    }
+    return _handleResponse(response);
   }
 
-  // ================= AUTHORIZED POST =================
   static Future<Map<String, dynamic>> authorizedPost(
-      String endpoint,
-      Map<String, dynamic> body,
-      ) async {
+      String endpoint, Map<String, dynamic> body) async {
     final token = await getToken();
-
-    if (token == null) {
-      throw Exception("Token not found. Please login again.");
-    }
 
     final response = await http.post(
       Uri.parse("$baseUrl$endpoint"),
@@ -142,37 +49,110 @@ class ApiService {
       body: jsonEncode(body),
     );
 
+    return _handleResponse(response);
+  }
+
+  static Future<Map<String, dynamic>> authorizedPatch(
+      String endpoint, Map<String, dynamic> body) async {
+    final token = await getToken();
+
+    final response = await http.patch(
+      Uri.parse("$baseUrl$endpoint"),
+      headers: _headers(token: token),
+      body: jsonEncode(body),
+    );
+
+    return _handleResponse(response);
+  }
+
+  static Future<void> authorizedDelete(String endpoint) async {
+    final token = await getToken();
+
+    final response = await http.delete(
+      Uri.parse("$baseUrl$endpoint"),
+      headers: _headers(token: token),
+    );
+
+    if (response.statusCode != 200 && response.statusCode != 204) {
+      throw Exception("Delete failed");
+    }
+  }
+
+  static Map<String, dynamic> _handleResponse(http.Response response) {
     final data = jsonDecode(response.body);
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       return data;
+    } else if (response.statusCode == 401) {
+      logout();
+      throw Exception("Session expired");
     } else {
       throw Exception(data["message"] ?? "Request Failed");
     }
   }
 
-  // ================= DASHBOARD =================
-  static Future<Map<String, dynamic>> getDashboardStats(
-      String? messId) async {
-    String endpoint = "/auth/stats";
-
-    if (messId != null) {
-      endpoint += "?messId=$messId";
-    }
-
-    return await authorizedGet(endpoint);
+  /// ================= AUTH =================
+  static Future<Map<String, dynamic>> login(String phone) async {
+    return await authorizedPost("/auth/login", {"phone": phone});
   }
 
-  // ================= GET ALL MESSES =================
+  static Future<Map<String, dynamic>> verifyOtp(
+      String phone, String otp) async {
+    final res =
+    await authorizedPost("/auth/verify-otp", {"phone": phone, "otp": otp});
+
+    if (res["token"] != null) {
+      await saveToken(res["token"]);
+    }
+
+    return res;
+  }
+
+  /// ================= DASHBOARD =================
+  static Future<Map<String, dynamic>> getDashboardStats(String s) async {
+    return await authorizedGet("/dashboard");
+  }
+
+  /// ================= MESSES =================
   static Future<List<dynamic>> getAllMesses() async {
     final response = await authorizedGet("/mess");
-
-    final data = response["data"];
-
-    if (data is List) {
-      return data;
-    } else {
-      return [];
-    }
+    return response["data"] ?? [];
   }
+
+  /// ================= PLANS =================
+  static Future<Map<String, dynamic>> getPlans(String messId) async {
+    return await authorizedGet("/plans?page=1&limit=10&messId=$messId");
+  }
+
+  /// ================= CUSTOMERS =================
+  static Future<Map<String, dynamic>> getCustomers(String messId) async {
+    return await authorizedGet("/customer?page=1&limit=10&messId=$messId");
+  }
+
+  static Future<Map<String, dynamic>> addCustomer(
+      Map<String, dynamic> body) async {
+    return await authorizedPost("/customer", body);
+  }
+
+  static Future<Map<String, dynamic>> updateCustomer(
+      String id, Map<String, dynamic> body) async {
+    return await authorizedPatch("/customer/$id", body);
+  }
+
+  static Future<void> deleteCustomer(String id) async {
+    await authorizedDelete("/customer/$id");
+  }
+
+  /// ================= DELIVERY AGENTS =================
+  static Future<Map<String, dynamic>> getPartners(String messId) async {
+    return await authorizedGet(
+        "/delivery-agent?page=1&limit=10&messId=$messId");
+  }
+
+  static Future<Map<String, dynamic>> addPartner(
+      Map<String, dynamic> body) async {
+    return await authorizedPost("/delivery-agent", body);
+  }
+
+  static Future<dynamic> sendLoginOtp(String phone) async {}
 }

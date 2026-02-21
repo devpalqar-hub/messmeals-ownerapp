@@ -1,50 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_instance/get_instance.dart';
-import 'package:get/utils.dart';
-import 'package:messmeals/controllers/plansController.dart';
-import 'package:messmeals/models/mess_plan_model.dart';
+import '../controllers/plansController.dart';
+import '../models/mess_plan_model.dart';
 import 'add_plan_screen.dart';
-import 'edit_plan_screen.dart';
 
-class PlansScreen extends StatelessWidget {
+class PlansScreen extends StatefulWidget {
   final String? messId;
 
-  PlansScreen({super.key, this.messId});
+  const PlansScreen({super.key, this.messId});
 
-  final List<Map<String, dynamic>> plans = [
-    {
-      "title": "Basic Plan",
-      "price": "₹3000",
-      "minPrice": "₹2500",
-      "desc": "Standard meals with basic menu",
-      "meals": ["Lunch", "Dinner"]
-    },
-    {
-      "title": "Premium Plan",
-      "price": "₹5000",
-      "minPrice": "₹4500",
-      "desc": "Premium meals with extended",
-      "meals": ["Breakfast", "Lunch", "Dinner"]
-    },
-  ];
+  @override
+  State<PlansScreen> createState() => _PlansScreenState();
+}
 
-  Planscontroller controller = Get.put(Planscontroller());
+class _PlansScreenState extends State<PlansScreen> {
+  late PlansController controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    controller = Get.put(PlansController());
+
+    if (widget.messId != null) {
+      controller.fetchMessPlan(widget.messId!);   // ✅ FIXED
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant PlansScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.messId != widget.messId && widget.messId != null) {
+      controller.fetchMessPlan(widget.messId!);   // ✅ FIXED
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    controller.fetchMessPlan();
+    if (widget.messId == null) {
+      return const Center(
+        child: Text("Please select a mess", style: TextStyle(fontSize: 16)),
+      );
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xffF5F6FA),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        title: const Text(
-          "Plans",
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        title: const Text("Plans", style: TextStyle(color: Colors.black)),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
@@ -58,7 +63,7 @@ class PlansScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => const AddPlanScreen(),
+                    builder: (_) => AddPlanScreen(messId: widget.messId!),
                   ),
                 );
               },
@@ -66,48 +71,39 @@ class PlansScreen extends StatelessWidget {
           )
         ],
       ),
-      body: SafeArea(
-        child: GetBuilder<Planscontroller>(builder: (__) {
-          return Padding(
+
+      body: GetBuilder<PlansController>(
+        builder: (c) {
+          if (c.isMessPlanLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (c.messPlanList.isEmpty) {
+            return const Center(child: Text("No plans found"));
+          }
+
+          return ListView.builder(
             padding: const EdgeInsets.all(16),
-            child: (__.isMessPlanLoading)
-                ? Center(child: CircularProgressIndicator())
-                : SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        TextField(
-                          decoration: InputDecoration(
-                            hintText: "Search plans...",
-                            prefixIcon: const Icon(Icons.search),
-                            filled: true,
-                            fillColor: Colors.white,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        for (var data in __.messPlanList) PlanCard(plan: data)
-                      ],
-                    ),
-                  ),
+            itemCount: c.messPlanList.length,
+            itemBuilder: (context, index) {
+              return PlanCard(plan: c.messPlanList[index]);
+            },
           );
-        }),
+        },
       ),
     );
   }
 }
 
 class PlanCard extends StatelessWidget {
-  MessPlanModel plan;
+  final MessPlanModel plan;
 
-  PlanCard({super.key, required this.plan});
+  const PlanCard({super.key, required this.plan});
 
   @override
   Widget build(BuildContext context) {
     final meals =
-        List<String>.from(plan.variation!.map((ctx) => ctx.title)).toList();
+    List<String>.from(plan.variation?.map((e) => e.title) ?? []);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
@@ -120,77 +116,18 @@ class PlanCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                plan.planName ?? "",
-                style:
-                    const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(plan.price ?? ""),
-                  if ((plan.minPrice ?? "").toString().isNotEmpty)
-                    Text(
-                      "Min: ${plan.minPrice}",
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
-                ],
-              )
-            ],
+          Text(
+            plan.planName ?? "",
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Text(plan.description ?? "",
               style: const TextStyle(color: Colors.grey)),
-          const SizedBox(height: 10),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: meals
-                      .map(
-                        (e) => Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: const Color(0xffF1F2F6),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            e,
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                        ),
-                      )
-                      .toList(),
-                ),
-              ),
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.edit, size: 20),
-                    onPressed: () {
-                      // Navigator.push(
-                      //   context,
-                      //   MaterialPageRoute(
-                      //     builder: (_) => EditPlanScreen(plan: plan),
-                      //   ),
-                      // );
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete, size: 20),
-                    onPressed: () {},
-                  ),
-                ],
-              ),
-            ],
-          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 6,
+            children: meals.map((e) => Chip(label: Text(e))).toList(),
+          )
         ],
       ),
     );

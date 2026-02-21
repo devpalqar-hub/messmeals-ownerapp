@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import '../service/api_service.dart';
 
 class PartnerDetailsScreen extends StatelessWidget {
+  final String? messId;
+  final String? partnerId;
   final String name;
   final String phone;
   final String email;
@@ -8,11 +11,33 @@ class PartnerDetailsScreen extends StatelessWidget {
 
   const PartnerDetailsScreen({
     super.key,
+    this.messId,
+    this.partnerId,
     required this.name,
     required this.phone,
     required this.email,
     required this.address,
   });
+
+
+  Future<void> deletePartner(BuildContext context) async {
+    if (partnerId == null) return;
+
+    try {
+      await ApiService.authorizedPost(
+        "/partners/delete",
+        {"partner_id": partnerId, "mess_id": messId},
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Partner deleted")),
+      );
+
+      Navigator.pop(context);
+    } catch (e) {
+      debugPrint("Delete error: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,12 +55,13 @@ class PartnerDetailsScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.edit, color: Colors.black),
-            onPressed: () {},
+            onPressed: () {
+              /// ⭐ future edit screen
+            },
           ),
           IconButton(
-          
             icon: const Icon(Icons.delete, color: Colors.black),
-            onPressed: () {},
+            onPressed: () => deletePartner(context),
           ),
         ],
       ),
@@ -71,7 +97,7 @@ class PartnerDetailsScreen extends StatelessWidget {
                   ],
                 ),
               ),
-        
+
               const SizedBox(height: 16),
 
               Row(
@@ -83,9 +109,9 @@ class PartnerDetailsScreen extends StatelessWidget {
                       Colors.blue),
                 ],
               ),
-        
+
               const SizedBox(height: 12),
-        
+
               Row(
                 children: [
                   _statCard("Earnings", "₹10,023", Icons.currency_rupee,
@@ -95,7 +121,7 @@ class PartnerDetailsScreen extends StatelessWidget {
                       Colors.orange),
                 ],
               ),
-        
+
               const SizedBox(height: 16),
 
               _card(
@@ -103,11 +129,9 @@ class PartnerDetailsScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text("Performance Metrics",
-                        style:
-                        TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-        
+                        style: TextStyle(
+                            fontWeight: FontWeight.w600, fontSize: 16)),
                     const SizedBox(height: 12),
-        
                     const Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -115,56 +139,25 @@ class PartnerDetailsScreen extends StatelessWidget {
                         Text("50.0%"),
                       ],
                     ),
-        
                     const SizedBox(height: 8),
-        
                     ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: LinearProgressIndicator(
                         value: 0.5,
                         minHeight: 8,
-                        backgroundColor: Colors.grey.shade300,
+                        backgroundColor: Colors.grey,
                         color: const Color(0xff2F6FED),
                       ),
                     ),
-        
-                    const SizedBox(height: 16),
-        
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        _miniStat("1", "Completed"),
-                        _miniStat("0", "In Progress"),
-                        _miniStat("1", "Pending"),
-                      ],
-                    )
                   ],
                 ),
               ),
-        
-              const SizedBox(height: 16),
-
-              _card(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text("Recent Deliveries",
-                        style:
-                        TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-                    SizedBox(height: 12),
-                    _deliveryRow("pending", "Delivery #1", "₹100", false),
-                    SizedBox(height: 8),
-                    _deliveryRow("completed", "Delivery #1", "₹100", true),
-                  ],
-                ),
-              )
             ],
           ),
         ),
       ),
     );
   }
-
 
   Widget _card({required Widget child}) {
     return Container(
@@ -205,55 +198,6 @@ class PartnerDetailsScreen extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _miniStat extends StatelessWidget {
-  final String value;
-  final String label;
-
-  const _miniStat(this.value, this.label);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(value,
-            style: const TextStyle(
-                fontWeight: FontWeight.bold, fontSize: 16)),
-        Text(label, style: const TextStyle(color: Colors.grey)),
-      ],
-    );
-  }
-}
-
-class _deliveryRow extends StatelessWidget {
-  final String status;
-  final String title;
-  final String amount;
-  final bool completed;
-
-  const _deliveryRow(this.status, this.title, this.amount, this.completed);
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            Chip(
-              label: Text(status),
-              backgroundColor:
-              completed ? const Color(0xffC8E6C9) : Colors.grey.shade300,
-            ),
-            const SizedBox(width: 10),
-            Text(title),
-          ],
-        ),
-        Text(amount),
-      ],
     );
   }
 }
