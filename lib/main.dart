@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'service/api_service.dart';
+
 import 'screens/login_screen.dart';
 import 'screens/otp_page.dart';
 import 'screens/main_layout.dart';
+import 'service/api_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,21 +21,27 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isLoggedIn = token != null && token!.isNotEmpty;
+
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: token != null ? "/main" : "/login",
+
+      /// ⭐ START PAGE
+      initialRoute: isLoggedIn ? "/main" : "/login",
+
+      /// ⭐ ROUTES
       getPages: [
         GetPage(
           name: "/login",
-          page: () => const LoginScreen(),
+          page: () => LoginScreen(),
         ),
         GetPage(
           name: "/otp",
-          page: () => const OtpPage(),
+          page: () => OtpScreen(),   // ⭐ must match class name
         ),
         GetPage(
           name: "/main",
-          page: () => const MainLayout(),
+          page: () => MainLayout(),
         ),
       ],
     );

@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 
 class AddPartnerScreen extends StatelessWidget {
-  const AddPartnerScreen({super.key, String? messId});
+  const AddPartnerScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xffF5F6FA),
 
+      /// APP BAR
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xffF5F6FA),
         elevation: 0,
-        leading: const BackButton(color: Colors.black),
+        leading: const Icon(Icons.arrow_back, color: Colors.black),
         title: const Text(
           "Add Partners",
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
       ),
 
@@ -22,64 +23,104 @@ class AddPartnerScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-
-            /// FORM
-            Expanded(
-              child: ListView(
+            /// BASIC INFO CARD
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const Text("Basic Information",
+                      style: TextStyle(fontWeight: FontWeight.bold)),
 
-                  /// ---------------- Basic Info Card ----------------
-                  _card(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text("Basic Information",
-                            style: TextStyle(fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 10),
 
-                        SizedBox(height: 16),
-                        _input("Name *", "Enter full name"),
-                        _input("Phone *", "+91 98765 43210"),
-                        _input("Email", "email@example.com"),
-                        _input("Address", "Enter address"),
-                      ],
-                    ),
-                  ),
+                  _label("Name *"),
+                  _field("Enter full name"),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
 
-                  /// ---------------- Status Card ----------------
-                  _card(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text("Status",
-                            style: TextStyle(fontWeight: FontWeight.w600)),
+                  _label("Phone *"),
+                  _field("+91 98765 43210"),
 
-                        SizedBox(height: 16),
-                        _input("Current Status *", "Active"),
-                      ],
-                    ),
-                  ),
+                  const SizedBox(height: 10),
+
+                  _label("Email"),
+                  _field("email@example.com"),
+
+                  const SizedBox(height: 10),
+
+                  _label("Address"),
+                  _field("Enter address", max: 2),
                 ],
               ),
             ),
 
-            /// ---------------- Buttons ----------------
+            const SizedBox(height: 14),
+
+            /// STATUS CARD
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("Status",
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 10),
+
+                  _label("Current Status *"),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xffF1F3F6),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text("Active"),
+                        Icon(Icons.keyboard_arrow_down),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ),
+
+            const Spacer(),
+
+            /// BUTTONS
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
                     child: const Text("Cancel"),
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {},
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xff2F6FED),
+                      backgroundColor: const Color(0xff3B6EA5),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
+                    onPressed: () {},
                     child: const Text("Add Partner"),
                   ),
                 ),
@@ -90,49 +131,24 @@ class AddPartnerScreen extends StatelessWidget {
       ),
     );
   }
-}
 
-/// ================= UI helpers =================
+  /// LABEL
+  Widget _label(String text) {
+    return Text(text, style: const TextStyle(fontWeight: FontWeight.w500));
+  }
 
-Widget _card({required Widget child}) {
-  return Container(
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: Colors.grey.shade300),
-    ),
-    child: child,
-  );
-}
-
-class _input extends StatelessWidget {
-  final String label;
-  final String hint;
-
-  const _input(this.label, this.hint);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: const TextStyle(fontSize: 12)),
-          const SizedBox(height: 6),
-          TextField(
-            decoration: InputDecoration(
-              hintText: hint,
-              filled: true,
-              fillColor: const Color(0xffF2F3F7),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide.none,
-              ),
-            ),
-          )
-        ],
+  /// TEXT FIELD
+  Widget _field(String hint, {int max = 1}) {
+    return TextField(
+      maxLines: max,
+      decoration: InputDecoration(
+        hintText: hint,
+        filled: true,
+        fillColor: const Color(0xffF1F3F6),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
       ),
     );
   }

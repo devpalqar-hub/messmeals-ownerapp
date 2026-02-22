@@ -1,156 +1,160 @@
 import 'package:flutter/material.dart';
-import '../service/api_service.dart';
-import 'add_customer_screen.dart';
-import 'customer_details_screen.dart';
 
-class CustomersScreen extends StatefulWidget {
+class CustomersScreen extends StatelessWidget {
   final String? messId;
-
   const CustomersScreen({super.key, this.messId});
 
   @override
-  State<CustomersScreen> createState() => _CustomersScreenState();
-}
-
-class _CustomersScreenState extends State<CustomersScreen> {
-  List<dynamic> customers = [];
-  bool isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    fetchCustomers();
-  }
-
-  @override
-  void didUpdateWidget(covariant CustomersScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    /// Refresh when mess changes
-    if (oldWidget.messId != widget.messId && widget.messId != null) {
-      fetchCustomers();
-    }
-  }
-
-  /// ⭐ FETCH CUSTOMERS
-  Future<void> fetchCustomers() async {
-    if (widget.messId == null) return;
-
-    try {
-      setState(() => isLoading = true);
-
-      /// ✅ FIX: messId! because already null checked
-      final response = await ApiService.getCustomers(widget.messId!);
-      customers = response["data"] ?? [];
-    } catch (e) {
-      debugPrint("Customer fetch error: $e");
-    } finally {
-      setState(() => isLoading = false);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (widget.messId == null) {
-      return const Center(child: Text("Select a mess"));
-    }
-
-    if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    return Scaffold(
-      backgroundColor: const Color(0xffF5F6FA),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          /// HEADER
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              /// ⭐ HEADER
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("${customers.length} Customers",
-                      style: const TextStyle(
-                          fontSize: 22, fontWeight: FontWeight.w600)),
-
-                  /// ⭐ ADD BUTTON
-                  ElevatedButton.icon(
-                    onPressed: () async {
-                      /// Navigate and refresh after add
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              AddCustomerScreen(messId: widget.messId!),
-                        ),
-                      );
-
-                      fetchCustomers();
-                    },
-                    icon: const Icon(Icons.add, size: 18),
-                    label: const Text("Add"),
-                  )
+                  Text("Customers",
+                      style:
+                      TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 4),
+                  Text("3 customers",
+                      style: TextStyle(color: Colors.grey)),
                 ],
               ),
-
-              const SizedBox(height: 20),
-
-              /// ⭐ LIST
-              Expanded(
-                child: customers.isEmpty
-                    ? const Center(child: Text("No customers found"))
-                    : ListView.builder(
-                  itemCount: customers.length,
-                  itemBuilder: (_, index) {
-                    final customer = customers[index];
-
-                    return InkWell(
-                      onTap: () async {
-                        await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => CustomerDetailsScreen(
-                              name: customer["name"] ?? "",
-                              phone: customer["phone"] ?? "",
-                              email: customer["email"] ?? "",
-                              address: customer["address"] ?? "",
-                            ),
-                          ),
-                        );
-
-                        fetchCustomers();
-                      },
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(customer["name"] ?? "",
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16)),
-                            const SizedBox(height: 6),
-                            Text(customer["phone"] ?? "",
-                                style: const TextStyle(
-                                    color: Colors.grey)),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xff3B6EA5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
+                onPressed: () {},
+                icon: const Icon(Icons.add),
+                label: const Text("Add"),
               )
             ],
           ),
-        ),
+
+          const SizedBox(height: 14),
+
+          /// SEARCH
+          TextField(
+            decoration: InputDecoration(
+              hintText: "Search customers...",
+              prefixIcon: const Icon(Icons.search),
+              filled: true,
+              fillColor: const Color(0xffF1F3F6),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 14),
+
+          /// LIST
+          const CustomerCard(),
+          const CustomerCard(active: true),
+          const CustomerCard(active: false),
+        ],
       ),
+    );
+  }
+}
+class CustomerCard extends StatelessWidget {
+  final bool active;
+
+  const CustomerCard({super.key, this.active = true});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          /// NAME + STATUS
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  "Ravi Kumar",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+              ),
+              Container(
+                padding:
+                const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: active ? Colors.black : Colors.grey,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  active ? "active" : "inactive",
+                  style: const TextStyle(color: Colors.white, fontSize: 12),
+                ),
+              ),
+              const SizedBox(width: 6),
+              const Icon(Icons.edit_outlined, size: 18),
+              const SizedBox(width: 10),
+              const Icon(Icons.delete_outline, size: 18),
+              const SizedBox(width: 6),
+              const Icon(Icons.chevron_right),
+            ],
+          ),
+
+          const SizedBox(height: 6),
+
+          /// PHONE + EMAIL
+          const Text("+91 98765 11111", style: TextStyle(color: Colors.grey)),
+          const Text("ravi@example.com",
+              style: TextStyle(color: Colors.grey)),
+
+          const SizedBox(height: 10),
+          const Divider(),
+
+          /// FOOTER
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: const [
+              _Info("TOTAL DELIVERIES", "245"),
+              _Info("LOCATION", "Bangalore"),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+}
+class _Info extends StatelessWidget {
+  final String title;
+  final String value;
+
+  const _Info(this.title, this.value);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title,
+            style: const TextStyle(fontSize: 11, color: Colors.grey)),
+        const SizedBox(height: 2),
+        Text(value,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
+      ],
     );
   }
 }

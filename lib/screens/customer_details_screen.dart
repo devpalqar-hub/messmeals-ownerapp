@@ -1,120 +1,205 @@
 import 'package:flutter/material.dart';
 
 class CustomerDetailsScreen extends StatelessWidget {
-  final String name;
-  final String phone;
-  final String email;
-  final String address;
-
-  const CustomerDetailsScreen({
-    super.key,
-    required this.name,
-    required this.phone,
-    required this.email,
-    required this.address,
-  });
+  const CustomerDetailsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xffF5F6FA),
-
-      /// ================= APPBAR =================
       appBar: AppBar(
         backgroundColor: const Color(0xffF5F6FA),
         elevation: 0,
-        leading: const BackButton(color: Colors.black),
-        title: const Text(
-          "Customer Details",
-          style: TextStyle(color: Colors.black),
-        ),
-        actions: const [
-          Icon(Icons.edit, color: Colors.black),
-          SizedBox(width: 10),
-          Icon(Icons.delete, color: Colors.black),
-          SizedBox(width: 10),
+        leading: const Icon(Icons.arrow_back, color: Colors.black),
+        title: const Text("Customer Details",
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        actions: [
+          _action(Icons.edit, "Edit"),
+          const SizedBox(width: 8),
+          _action(Icons.delete_outline, "Delete"),
+          const SizedBox(width: 10),
         ],
       ),
-
-      /// ================= BODY =================
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 110),
+        padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
-            /// ================= PROFILE =================
-            _card(
+            /// PROFILE CARD
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18)),
               child: Row(
                 children: [
-                  const CircleAvatar(
-                    radius: 26,
-                    backgroundColor: Color(0xffE2E2E2),
-                    child: Text("RS"),
+                  CircleAvatar(
+                    radius: 28,
+                    backgroundColor: Colors.grey.shade300,
+                    child: const Text("RS",
+                        style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(name,
-                            style: const TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w600)),
-                        const SizedBox(height: 6),
-                        _rowIcon(Icons.call, phone),
-                        _rowIcon(Icons.email, email),
-                        _rowIcon(Icons.location_on, address),
-                      ],
-                    ),
+                  const SizedBox(width: 12),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text("Rahul Sharma",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16)),
+                      SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(Icons.phone, size: 16, color: Colors.grey),
+                          SizedBox(width: 4),
+                          Text("+91 98765 43210",
+                              style: TextStyle(color: Colors.grey)),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Icon(Icons.email, size: 16, color: Colors.grey),
+                          SizedBox(width: 4),
+                          Text("rahul@example.com",
+                              style: TextStyle(color: Colors.grey)),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Icon(Icons.location_on,
+                              size: 16, color: Colors.grey),
+                          SizedBox(width: 4),
+                          Text("123 MG Road, Bangalore",
+                              style: TextStyle(color: Colors.grey)),
+                        ],
+                      ),
+                    ],
                   )
                 ],
               ),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
-            /// ================= STATS GRID =================
+            /// WALLET + PLAN
             Row(
-              children: [
-                Expanded(child: _walletCard()),
-                const SizedBox(width: 12),
-                Expanded(child: _infoCard("TOTAL ORDERS", "1", Icons.inventory)),
+              children: const [
+                Expanded(child: _InfoCard("WALLET\nBALANCE", "₹20000", Icons.account_balance_wallet)),
+                SizedBox(width: 10),
+                Expanded(child: _InfoCard("PLAN\nPRICE", "₹1500", Icons.inventory_2_outlined)),
               ],
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
 
+            /// SPENT + DAYS
             Row(
-              children: [
-                Expanded(child: _infoCard("TOTAL SPENT", "₹100", Icons.currency_rupee)),
-                const SizedBox(width: 12),
-                Expanded(child: _infoCard("DAYS LEFT", "7", Icons.calendar_today)),
+              children: const [
+                Expanded(child: _InfoCard("TOTAL\nSPENT", "₹100", Icons.credit_card)),
+                SizedBox(width: 10),
+                Expanded(child: _InfoCard("DAYS\nLEFT", "7", Icons.calendar_today)),
               ],
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
 
-            /// ================= SUBSCRIPTION =================
-            _subscriptionCard(),
+            /// SUBSCRIPTION DETAILS
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("Subscription Details",
+                      style: TextStyle(fontWeight: FontWeight.bold)),
 
-            const SizedBox(height: 16),
+                  const SizedBox(height: 10),
 
-            /// ================= RECENT =================
-            _card(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Row(
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Chip(
-                        label: Text("completed"),
-                        backgroundColor: Color(0xffC8E6C9),
-                      ),
-                      SizedBox(width: 8),
-                      Text("Delivery #1"),
+                      _Detail("CURRENT PLAN", "Basic Plan"),
+                      _Detail("PLAN PRICE", "₹3000"),
                     ],
                   ),
-                  Text("₹100"),
+
+                  const SizedBox(height: 10),
+
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _Detail("START DATE", "Oct 1, 2025"),
+                      _Detail("END DATE", "Oct 31, 2025"),
+                    ],
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  const Text("Plan Variations",
+                      style: TextStyle(color: Colors.grey)),
+
+                  const SizedBox(height: 6),
+
+                  Wrap(
+                    spacing: 6,
+                    children: const [
+                      Chip(label: Text("Lunch")),
+                      Chip(label: Text("Dinner")),
+                    ],
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xff3B6EA5),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
+                      onPressed: () {},
+                      child: const Text("Renew Subscription"),
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      onPressed: () {},
+                      child: const Text("Cancel Subscription"),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 14),
+
+            /// RECENT DELIVERY
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  Text("Recent Deliveries",
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Chip(label: Text("completed")),
+                      Text("₹100"),
+                    ],
+                  ),
+                  Text("Delivery #1", style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("Oct 16, 2025", style: TextStyle(color: Colors.grey)),
                 ],
               ),
             ),
@@ -124,171 +209,57 @@ class CustomerDetailsScreen extends StatelessWidget {
     );
   }
 
-  /// ================= WIDGETS =================
-
-  Widget _walletCard() {
-    return SizedBox(
-      height: 115, // ⭐ forces equal height
-      child: _card(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.account_balance_wallet,
-                color: Colors.green, size: 22),
-
-            const SizedBox(height: 4),
-
-            const Text("WALLET BALANCE",
-                style: TextStyle(fontSize: 11, color: Colors.grey)),
-
-            const SizedBox(height: 2),
-
-            const Text("₹20000",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-
-            const SizedBox(height: 6),
-
-            SizedBox(
-              height: 26,
-              child: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xff2F6FED),
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                ),
-                child: const Text("Add money",
-                    style: TextStyle(fontSize: 11)),
-              ),
-            ),
-          ],
-        ),
-      ),
+  Widget _action(IconData icon, String label) {
+    return OutlinedButton.icon(
+      onPressed: () {},
+      icon: Icon(icon, size: 18),
+      label: Text(label),
     );
   }
+}
+class _InfoCard extends StatelessWidget {
+  final String title;
+  final String value;
+  final IconData icon;
 
-  Widget _infoCard(String title, String value, IconData icon) {
-    return SizedBox(
-      height: 115, // ⭐ SAME height as wallet
-      child: _card(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 22),
+  const _InfoCard(this.title, this.value, this.icon);
 
-            const SizedBox(height: 6),
-
-            Text(title,
-                style: const TextStyle(fontSize: 11, color: Colors.grey)),
-
-            const SizedBox(height: 4),
-
-            Text(value,
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold, fontSize: 16)),
-          ],
-        ),
-      ),
-    );
-  }
-  Widget _subscriptionCard() {
-    return _card(
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration:
+      BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Subscription Details",
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-          const SizedBox(height: 14),
-
-          _twoCol("Current Plan", "Basic Plan"),
-          _twoCol("Plan Price", "₹3000"),
-          _twoCol("Start Date", "Oct 1, 2025"),
-          _twoCol("End Date", "Oct 31, 2025"),
-
-          const SizedBox(height: 12),
-
-          Wrap(
-            spacing: 8,
-            children: const [
-              Chip(label: Text("Lunch")),
-              Chip(label: Text("Dinner")),
-            ],
-          ),
-
-          const SizedBox(height: 14),
-
-          _primaryBtn("Renew Subscription"),
-          const SizedBox(height: 10),
-          _outlineBtn("Pause Subscription", const Color(0xff2F6FED)),
-          const SizedBox(height: 10),
-          _outlineBtn("Cancel Subscription", Colors.red),
+          Icon(icon, color: Colors.grey),
+          const SizedBox(height: 8),
+          Text(title, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+          const SizedBox(height: 4),
+          Text(value,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
         ],
       ),
     );
   }
+}
 
-  Widget _primaryBtn(String text) => SizedBox(
-    width: double.infinity,
-    height: 44,
-    child: ElevatedButton(
-      onPressed: () {},
-      style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xff2F6FED),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-      child: Text(text),
-    ),
-  );
+class _Detail extends StatelessWidget {
+  final String title;
+  final String value;
 
-  Widget _outlineBtn(String text, Color color) => SizedBox(
-    width: double.infinity,
-    height: 44,
-    child: OutlinedButton(
-      onPressed: () {},
-      style: OutlinedButton.styleFrom(
-        foregroundColor: color,
-        side: BorderSide(color: color),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-      child: Text(text),
-    ),
-  );
+  const _Detail(this.title, this.value);
 
-  Widget _card({required Widget child}) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: child,
-    );
-  }
-
-  Widget _rowIcon(IconData icon, String text) {
-    return Row(
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 14, color: Colors.grey),
-        const SizedBox(width: 6),
-        Text(text, style: const TextStyle(color: Colors.grey)),
+        Text(title, style: const TextStyle(fontSize: 11, color: Colors.grey)),
+        const SizedBox(height: 2),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
       ],
-    );
-  }
-
-  Widget _twoCol(String a, String b) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(a),
-          Text(b, style: const TextStyle(fontWeight: FontWeight.w600)),
-        ],
-      ),
     );
   }
 }

@@ -1,132 +1,203 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import '../controllers/plansController.dart';
-import '../models/mess_plan_model.dart';
-import 'add_plan_screen.dart';
 
-class PlansScreen extends StatefulWidget {
-  final String? messId;
-
-  const PlansScreen({super.key, this.messId});
-
-  @override
-  State<PlansScreen> createState() => _PlansScreenState();
-}
-
-class _PlansScreenState extends State<PlansScreen> {
-  late PlansController controller;
-
-  @override
-  void initState() {
-    super.initState();
-
-    controller = Get.put(PlansController());
-
-    if (widget.messId != null) {
-      controller.fetchMessPlan(widget.messId!);   // ✅ FIXED
-    }
-  }
-
-  @override
-  void didUpdateWidget(covariant PlansScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    if (oldWidget.messId != widget.messId && widget.messId != null) {
-      controller.fetchMessPlan(widget.messId!);   // ✅ FIXED
-    }
-  }
+class PlansScreen extends StatelessWidget {
+  const PlansScreen({super.key, String? messId});
 
   @override
   Widget build(BuildContext context) {
-    if (widget.messId == null) {
-      return const Center(
-        child: Text("Please select a mess", style: TextStyle(fontSize: 16)),
-      );
-    }
-
     return Scaffold(
       backgroundColor: const Color(0xffF5F6FA),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: const Text("Plans", style: TextStyle(color: Colors.black)),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: ElevatedButton.icon(
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text("Add"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xff2F6FED),
-              ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => AddPlanScreen(messId: widget.messId!),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /// HEADER
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Plans",
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        "4 Plans added",
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ],
                   ),
-                );
-              },
-            ),
-          )
-        ],
-      ),
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xff3B6EA5),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: () {},
+                    icon: const Icon(Icons.add),
+                    label: const Text("Add"),
+                  )
+                ],
+              ),
 
-      body: GetBuilder<PlansController>(
-        builder: (c) {
-          if (c.isMessPlanLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
+              const SizedBox(height: 16),
 
-          if (c.messPlanList.isEmpty) {
-            return const Center(child: Text("No plans found"));
-          }
+              /// SEARCH
+              TextField(
+                decoration: InputDecoration(
+                  hintText: "Search customers...",
+                  prefixIcon: const Icon(Icons.search),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: c.messPlanList.length,
-            itemBuilder: (context, index) {
-              return PlanCard(plan: c.messPlanList[index]);
-            },
-          );
-        },
+              const SizedBox(height: 16),
+
+              /// PLAN LIST
+              Expanded(
+                child: ListView(
+                  children: const [
+                    PlanCard(
+                      title: "Basic Plan",
+                      price: "₹3000",
+                      minPrice: "₹2500",
+                      desc: "Standard meals with basic menu",
+                      meals: ["Lunch", "Dinner"],
+                    ),
+                    PlanCard(
+                      title: "Premium Plan",
+                      price: "₹5000",
+                      minPrice: "₹4500",
+                      desc: "Premium meals with extended",
+                      meals: ["Breakfast", "Lunch", "Dinner"],
+                    ),
+                    PlanCard(
+                      title: "Lunch Only",
+                      price: "₹2000",
+                      minPrice: "",
+                      desc: "Lunch meals only",
+                      meals: ["Lunch"],
+                    ),
+                    PlanCard(
+                      title: "Breakfast Special",
+                      price: "₹1500",
+                      minPrice: "",
+                      desc: "Breakfast meals",
+                      meals: ["Breakfast"],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
-
 class PlanCard extends StatelessWidget {
-  final MessPlanModel plan;
+  final String title;
+  final String price;
+  final String minPrice;
+  final String desc;
+  final List<String> meals;
 
-  const PlanCard({super.key, required this.plan});
+  const PlanCard({
+    super.key,
+    required this.title,
+    required this.price,
+    required this.minPrice,
+    required this.desc,
+    required this.meals,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final meals =
-    List<String>.from(plan.variation?.map((e) => e.title) ?? []);
-
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(18),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Text(
-            plan.planName ?? "",
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+          /// ICON
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xffEEF1F5),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.restaurant),
           ),
-          const SizedBox(height: 6),
-          Text(plan.description ?? "",
-              style: const TextStyle(color: Colors.grey)),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 6,
-            children: meals.map((e) => Chip(label: Text(e))).toList(),
+
+          const SizedBox(width: 12),
+
+          /// DETAILS
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                /// TITLE + PRICE
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(title,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16)),
+                    Text(price,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 15)),
+                  ],
+                ),
+
+                if (minPrice.isNotEmpty)
+                  Text("Min: $minPrice",
+                      style: const TextStyle(color: Colors.grey)),
+
+                const SizedBox(height: 4),
+                Text(desc, style: const TextStyle(color: Colors.grey)),
+
+                const SizedBox(height: 8),
+
+                /// MEAL TAGS
+                Wrap(
+                  spacing: 6,
+                  children: meals
+                      .map(
+                        (e) => Chip(
+                      label: Text(e),
+                      backgroundColor: const Color(0xffEEF1F5),
+                    ),
+                  )
+                      .toList(),
+                )
+              ],
+            ),
+          ),
+
+          /// ACTIONS
+          Column(
+            children: const [
+              Icon(Icons.edit, size: 20),
+              SizedBox(height: 10),
+              Icon(Icons.delete, size: 20),
+            ],
           )
         ],
       ),

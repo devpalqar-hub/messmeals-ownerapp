@@ -1,104 +1,117 @@
 import 'package:flutter/material.dart';
 
 class AddCustomerScreen extends StatelessWidget {
-  final String? messId;
-
-  const AddCustomerScreen({super.key, this.messId});
+  const AddCustomerScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xffF5F6FA),
 
+      /// APP BAR
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xffF5F6FA),
         elevation: 0,
-        leading: const BackButton(color: Colors.black),
+        leading: const Icon(Icons.arrow_back, color: Colors.black),
         title: const Text(
           "Add Customer",
-          style: TextStyle(color: Colors.black),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
       ),
 
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-
-            /// FORM
-            Expanded(
-              child: ListView(
+            /// BASIC INFO
+            _card(
+              "Basic Information",
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  _label("Name"),
+                  _field("Enter full name"),
+                  const SizedBox(height: 10),
 
-                  /// ---------------- BASIC INFO ----------------
-                  _card(
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text("Basic Information",
-                            style: TextStyle(fontWeight: FontWeight.w600)),
+                  _label("Phone *"),
+                  _field("+91 98765 43210"),
+                  const SizedBox(height: 10),
 
-                        SizedBox(height: 16),
-                        _input("Name *", "Enter full name"),
-                        _input("Phone *", "+91 98765 43210"),
-                        _input("Email *", "email@example.com"),
-                        _input("Address *", "Enter full address"),
-                        _input("Latitude & Longitude", "Enter Lat & Long"),
-                      ],
-                    ),
-                  ),
+                  _label("Email *"),
+                  _field("email@example.com"),
+                  const SizedBox(height: 10),
 
-                  const SizedBox(height: 16),
+                  _label("Address *"),
+                  _field("Enter full address", max: 2),
+                  const SizedBox(height: 10),
 
-                  /// ---------------- PLAN & SUBSCRIPTION ----------------
-                  _card(
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text("Plan & Subscription",
-                            style: TextStyle(fontWeight: FontWeight.w600)),
+                  _buttonGrey("Get Current Location"),
+                  const SizedBox(height: 6),
 
-                        SizedBox(height: 16),
-                        _dropdown("Meal Plan *"),
-                        _input("Start Date *", ""),
-                        _input("End Date *", ""),
-                        _dropdown("Delivery Partner *"),
-                      ],
-                    ),
-                  ),
+                  const Center(child: Text("or")),
+                  const SizedBox(height: 6),
 
-                  const SizedBox(height: 16),
-
-                  /// ---------------- WALLET ----------------
-                  _card(
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text("Wallet",
-                            style: TextStyle(fontWeight: FontWeight.w600)),
-                        SizedBox(height: 12),
-                        _input("Initial Wallet Amount", "0"),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  /// ---------------- DISCOUNT ----------------
-                  _card(
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text("Discount",
-                            style: TextStyle(fontWeight: FontWeight.w600)),
-                        SizedBox(height: 12),
-                        _input("Select discount amount", "0"),
-                      ],
-                    ),
-                  ),
+                  _field("Enter Latitude And Longitude"),
                 ],
               ),
             ),
+
+            const SizedBox(height: 14),
+
+            /// PLAN & SUB
+            _card(
+              "Plan & Subscription",
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _label("Meal Plan *"),
+                  _dropdown("Select plan"),
+                  const SizedBox(height: 10),
+
+                  Row(
+                    children: [
+                      Expanded(child: _field("Start Date *")),
+                      const SizedBox(width: 10),
+                      Expanded(child: _field("End Date *")),
+                    ],
+                  ),
+
+                  const SizedBox(height: 10),
+                  _label("Delivery Partner *"),
+                  _dropdown("Select partner"),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 14),
+
+            /// WALLET
+            _card(
+              "Wallet",
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _label("Initial Wallet Amount"),
+                  _field("0"),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 14),
+
+            /// DISCOUNT
+            _card(
+              "Discount",
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _label("Select discount amount"),
+                  _field("0"),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 16),
 
             /// BUTTONS
             Row(
@@ -112,98 +125,87 @@ class AddCustomerScreen extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {},
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xff2F6FED),
+                      backgroundColor: const Color(0xff3B6EA5),
                     ),
+                    onPressed: () {},
                     child: const Text("Add Customer"),
                   ),
                 ),
               ],
-            ),
+            )
           ],
         ),
       ),
     );
   }
-}
 
-/// ================= WIDGET HELPERS =================
-
-Widget _card(Widget child) {
-  return Container(
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: Colors.grey.shade300),
-    ),
-    child: child,
-  );
-}
-
-class _input extends StatelessWidget {
-  final String label;
-  final String hint;
-
-  const _input(this.label, this.hint);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+  /// CARD
+  Widget _card(String title, Widget child) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration:
+      BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label),
-          const SizedBox(height: 6),
-          TextField(
-            decoration: InputDecoration(
-              hintText: hint,
-              filled: true,
-              fillColor: const Color(0xffF2F3F7),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide.none,
-              ),
-            ),
-          )
+          Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
+          child
         ],
       ),
     );
   }
-}
 
-class _dropdown extends StatelessWidget {
-  final String label;
+  /// LABEL
+  Widget _label(String text) {
+    return Text(text, style: const TextStyle(fontWeight: FontWeight.w500));
+  }
 
-  const _dropdown(this.label);
+  /// FIELD
+  Widget _field(String hint, {int max = 1}) {
+    return TextField(
+      maxLines: max,
+      decoration: InputDecoration(
+        hintText: hint,
+        filled: true,
+        fillColor: const Color(0xffF1F3F6),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+      ),
+    );
+  }
 
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  /// DROPDOWN
+  Widget _dropdown(String hint) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      decoration: BoxDecoration(
+        color: const Color(0xffF1F3F6),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label),
-          const SizedBox(height: 6),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-            decoration: BoxDecoration(
-              color: const Color(0xffF2F3F7),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: const [
-                Text("Select"),
-                Icon(Icons.keyboard_arrow_down),
-              ],
-            ),
-          )
+          Text(hint),
+          const Icon(Icons.keyboard_arrow_down),
         ],
       ),
+    );
+  }
+
+  /// GREY BUTTON
+  Widget _buttonGrey(String text) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      decoration: BoxDecoration(
+        color: const Color(0xffF1F3F6),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Center(child: Text(text)),
     );
   }
 }

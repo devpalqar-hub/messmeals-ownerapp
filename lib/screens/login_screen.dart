@@ -2,65 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../service/api_service.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
-
-  @override
-  State<LoginScreen> createState() => _LoginScreenState();
-}
-
-class _LoginScreenState extends State<LoginScreen> {
+class LoginScreen extends StatelessWidget {
+  LoginScreen({super.key});
 
   final TextEditingController phoneController = TextEditingController();
-  bool isLoading = false;
-
-  @override
-  void dispose() {
-    phoneController.dispose();
-    super.dispose();
-  }
-
-  Future<void> goToOtp() async {
-    final phone = phoneController.text.trim();
-
-    if (phone.isEmpty || phone.length < 10) {
-      Get.snackbar(
-        "Error",
-        "Enter valid phone number",
-        snackPosition: SnackPosition.BOTTOM,
-      );
-      return;
-    }
-
-    try {
-      setState(() {
-        isLoading = true;
-      });
-
-      final response = await ApiService.sendLoginOtp(phone);
-
-      final sessionId = response["sessionId"];
-
-      Get.toNamed(
-        "/otp",
-        arguments: {
-          "phone": phone,
-          "sessionId": sessionId,
-        },
-      );
-
-    } catch (e) {
-      Get.snackbar(
-        "Error",
-        e.toString(),
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,87 +13,91 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: const Color(0xffF5F6FA),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.all(16),
           child: Container(
-            padding: const EdgeInsets.all(25),
+            padding: const EdgeInsets.all(22),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(15),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                )
-              ],
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: const Color(0xffE5E5E5)),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-
-                // Logo
                 Container(
-                  height: 50,
-                  width: 50,
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.blue,
+                    color: const Color(0xff3B6EA5),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: const Icon(Icons.restaurant, color: Colors.white),
                 ),
-
+                const SizedBox(height: 12),
+                const Text("SuperMeals Admin",
+                    style:
+                    TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+                const Text("Sign in to your account",
+                    style: TextStyle(color: Colors.grey)),
                 const SizedBox(height: 20),
 
-                const Text(
-                  "SuperMeals Admin",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text("PHONE NUMBER",
+                      style: TextStyle(fontWeight: FontWeight.w500)),
                 ),
-
-                const SizedBox(height: 5),
-
-                const Text(
-                  "Enter your phone number",
-                  style: TextStyle(color: Colors.grey),
-                ),
-
-                const SizedBox(height: 25),
+                const SizedBox(height: 6),
 
                 TextField(
                   controller: phoneController,
                   keyboardType: TextInputType.phone,
                   decoration: InputDecoration(
-                    hintText: "Phone Number",
+                    hintText: "Enter phone number",
                     filled: true,
-                    fillColor: const Color(0xffF5F6FA),
+                    fillColor: const Color(0xffF1F3F6),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide.none,
-                    ),
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide.none),
                   ),
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: 18),
 
+                /// ⭐ LOGIN BUTTON
                 SizedBox(
                   width: double.infinity,
-                  height: 45,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
+                      backgroundColor: const Color(0xff3B6EA5),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                          borderRadius: BorderRadius.circular(10)),
                     ),
-                    onPressed: isLoading ? null : goToOtp,
-                    child: isLoading
-                        ? const CircularProgressIndicator(
-                      color: Colors.white,
-                    )
-                        : const Text("Continue"),
+                    onPressed: () async {
+                      if (phoneController.text.isEmpty) {
+                        Get.snackbar("Error", "Enter phone number");
+                        return;
+                      }
+
+                      try {
+                        final success =
+                        await ApiService.sendLoginOtp(phoneController.text);
+
+                        if (success) {
+                          Get.toNamed("/otp",
+                              arguments: phoneController.text);
+                        }
+                      } catch (e) {
+                        Get.snackbar("Error", e.toString());
+                      }
+                    },
+                    child: const Text("LOGIN"),
                   ),
                 ),
+
+                const SizedBox(height: 12),
+                const Text("Forgot password?",
+                    style: TextStyle(color: Colors.black54))
               ],
             ),
           ),

@@ -1,141 +1,170 @@
 import 'package:flutter/material.dart';
 
-class EditPlanScreen extends StatefulWidget {
-  final Map<String, dynamic>? plan;
-
-  const EditPlanScreen({super.key, this.plan});
+class EditPlanSheet extends StatefulWidget {
+  const EditPlanSheet({super.key});
 
   @override
-  State<EditPlanScreen> createState() => _EditPlanScreenState();
+  State<EditPlanSheet> createState() => _EditPlanSheetState();
 }
 
-class _EditPlanScreenState extends State<EditPlanScreen> {
-  final nameController = TextEditingController();
-  final priceController = TextEditingController();
-  final minPriceController = TextEditingController();
-  final descController = TextEditingController();
-  final imageController = TextEditingController();
+class _EditPlanSheetState extends State<EditPlanSheet> {
+  final name = TextEditingController(text: "breakfast");
+  final price = TextEditingController(text: "200");
+  final minPrice = TextEditingController(text: "150");
+  final desc = TextEditingController(text: "tasty bf");
 
+  bool breakfast = true;
   bool lunch = false;
   bool dinner = false;
-  bool both = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    final p = widget.plan;
-
-    if (p != null) {
-      nameController.text     = p["title"] ?? "";
-      priceController.text    = p["price"] ?? "";
-      minPriceController.text = p["minPrice"] ?? "";
-      descController.text     = p["desc"] ?? "";
-
-      final meals = List<String>.from(p["meals"] ?? []);
-
-      lunch  = meals.contains("Lunch");
-      dinner = meals.contains("Dinner");
-      both   = meals.length == 2;
-    }
-  }
-
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xffF5F6FA),
-      appBar: AppBar(
-        title: const Text("Edit Plan"),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-
-            _field("Plan Name *", nameController),
-            _field("Price *", priceController),
-            _field("Minimum Price", minPriceController),
-
-            const SizedBox(height: 12),
-
-            TextField(
-              controller: descController,
-              maxLines: 3,
-              decoration: _decoration("Description"),
-            ),
-
-            const SizedBox(height: 12),
-
-            _field("Image URL", imageController),
-
-            const SizedBox(height: 16),
-
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text("Delivery Variations *"),
-            ),
-
-            CheckboxListTile(
-              title: const Text("Lunch"),
-              value: lunch,
-              onChanged: (v) => setState(() => lunch = v!),
-            ),
-            CheckboxListTile(
-              title: const Text("Dinner"),
-              value: dinner,
-              onChanged: (v) => setState(() => dinner = v!),
-            ),
-            CheckboxListTile(
-              title: const Text("Both"),
-              value: both,
-              onChanged: (v) => setState(() => both = v!),
-            ),
-
-            const SizedBox(height: 20),
-
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text("Cancel"),
+    return DraggableScrollableSheet(
+      initialChildSize: 0.85,
+      maxChildSize: 0.95,
+      minChildSize: 0.6,
+      builder: (_, controller) {
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          child: ListView(
+            controller: controller,
+            children: [
+              /// DRAG HANDLE
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Text("Save"),
-                  ),
+              ),
+
+              const SizedBox(height: 12),
+
+              const Text("Edit Plan",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+
+              const SizedBox(height: 18),
+
+              _label("Plan Name *"),
+              _field(name),
+
+              const SizedBox(height: 12),
+
+              _label("Price *"),
+              _field(price),
+
+              const SizedBox(height: 12),
+
+              _label("Minimum Price *"),
+              _field(minPrice),
+
+              const SizedBox(height: 12),
+
+              _label("Description *"),
+              _field(desc, max: 3),
+
+              const SizedBox(height: 12),
+
+              _label("Plan Image *"),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: Image.network(
+                  "https://images.unsplash.com/photo-1490645935967-10de6ba17061",
+                  height: 120,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
                 ),
-              ],
-            )
-          ],
+              ),
+
+              const SizedBox(height: 16),
+
+              _label("Delivery Variations *"),
+
+              CheckboxListTile(
+                value: breakfast,
+                onChanged: (v) => setState(() => breakfast = v!),
+                title: const Text("Breakfast"),
+                controlAffinity: ListTileControlAffinity.leading,
+              ),
+              CheckboxListTile(
+                value: lunch,
+                onChanged: (v) => setState(() => lunch = v!),
+                title: const Text("Lunch"),
+                controlAffinity: ListTileControlAffinity.leading,
+              ),
+              CheckboxListTile(
+                value: dinner,
+                onChanged: (v) => setState(() => dinner = v!),
+                title: const Text("Dinner"),
+                controlAffinity: ListTileControlAffinity.leading,
+              ),
+
+              const SizedBox(height: 14),
+
+              /// BUTTONS
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("Cancel"),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () {},
+                      child: const Text("Update Plan"),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// LABEL
+  Widget _label(String text) {
+    return Text(text, style: const TextStyle(fontWeight: FontWeight.w500));
+  }
+
+  /// TEXT FIELD
+  Widget _field(TextEditingController c, {int max = 1}) {
+    return TextField(
+      controller: c,
+      maxLines: max,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: const Color(0xffF1F3F6),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
         ),
-      ),
-    );
-  }
-
-  Widget _field(String label, TextEditingController c) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: TextField(
-        controller: c,
-        decoration: _decoration(label),
-      ),
-    );
-  }
-
-  InputDecoration _decoration(String label) {
-    return InputDecoration(
-      labelText: label,
-      filled: true,
-      fillColor: Colors.white,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
       ),
     );
   }

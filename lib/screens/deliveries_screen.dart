@@ -1,122 +1,174 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import '../service/api_service.dart';
 
-class DeliveriesScreen extends StatefulWidget {
+class DeliveriesScreen extends StatelessWidget {
   final String? messId;
-
   const DeliveriesScreen({super.key, this.messId});
 
   @override
-  State<DeliveriesScreen> createState() => _DeliveriesScreenState();
-}
-
-class _DeliveriesScreenState extends State<DeliveriesScreen> {
-  String selectedStatus = "All Status";
-  DateTime selectedDate = DateTime.now();
-
-  List<dynamic> deliveries = [];
-  bool isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    fetchDeliveries();
-  }
-
-  /// ⭐ REFRESH WHEN MESS CHANGES
-  @override
-  void didUpdateWidget(covariant DeliveriesScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    if (oldWidget.messId != widget.messId) {
-      fetchDeliveries();
-    }
-  }
-
-  /// ⭐ API CALL
-  Future<void> fetchDeliveries() async {
-    if (widget.messId == null) return;
-
-    try {
-      setState(() => isLoading = true);
-
-      final response = await ApiService.authorizedGet(
-          "/deliveries?mess_id=${widget.messId}");
-
-      deliveries = response["data"] ?? [];
-
-      debugPrint("Deliveries fetched for mess: ${widget.messId}");
-    } catch (e) {
-      debugPrint("Deliveries error: $e");
-    } finally {
-      setState(() => isLoading = false);
-    }
-  }
-
-  Future<void> pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      firstDate: DateTime(2024),
-      lastDate: DateTime(2030),
-      initialDate: selectedDate,
-    );
-
-    if (picked != null) {
-      setState(() => selectedDate = picked);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (widget.messId == null) {
-      return const Center(child: Text("Select a mess"));
-    }
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          /// HEADER
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Deliveries",
+                      style:
+                      TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 4),
+                  Text("3 total deliveries",
+                      style: TextStyle(color: Colors.grey)),
+                ],
+              ),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xff3B6EA5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: () {},
+                icon: const Icon(Icons.add),
+                label: const Text("Generate"),
+              )
+            ],
+          ),
 
-    if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
+          const SizedBox(height: 14),
 
-    return Scaffold(
-      backgroundColor: const Color(0xffF5F6FA),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: deliveries.isEmpty
-            ? const Center(child: Text("No deliveries found"))
-            : ListView.builder(
-          itemCount: deliveries.length,
-          itemBuilder: (_, index) {
-            final delivery = deliveries[index];
-            return DeliveryCard(delivery: delivery);
-          },
-        ),
+          /// FILTERS
+          Row(
+            children: [
+              Expanded(child: _filterBox("All Status")),
+              const SizedBox(width: 10),
+              Expanded(child: _filterBox("All Dates")),
+            ],
+          ),
+
+          const SizedBox(height: 14),
+
+          /// DELIVERY LIST
+          const DeliveryCard(),
+          const DeliveryCard(inProgress: true),
+          const DeliveryCard(),
+        ],
+      ),
+    );
+  }
+
+  Widget _filterBox(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xffF1F3F6),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(text),
+          const Icon(Icons.keyboard_arrow_down),
+        ],
       ),
     );
   }
 }
-
 class DeliveryCard extends StatelessWidget {
-  final dynamic delivery;
+  final bool inProgress;
 
-  const DeliveryCard({super.key, required this.delivery});
+  const DeliveryCard({super.key, this.inProgress = false});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(delivery["customerName"] ?? "",
-              style: const TextStyle(fontWeight: FontWeight.bold)),
+          /// STATUS + PRICE
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding:
+                const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  inProgress ? "in-progress" : "completed",
+                  style: const TextStyle(color: Colors.white, fontSize: 12),
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: const [
+                  Text("₹100",
+                      style:
+                      TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                  Text("16/10/2025", style: TextStyle(color: Colors.grey)),
+                ],
+              )
+            ],
+          ),
+
           const SizedBox(height: 6),
-          Text(delivery["status"] ?? ""),
+
+          const Text("Rahul Sharma",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          const SizedBox(height: 4),
+          const Text("+919497677913", style: TextStyle(color: Colors.grey)),
+
+          const SizedBox(height: 8),
+          const Divider(),
+
+          /// SEGMENT BUTTON
+          Container(
+            decoration: BoxDecoration(
+              color: const Color(0xffF1F3F6),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              children: const [
+                _SegmentBtn("Pending", false),
+                _SegmentBtn("Progress", true),
+                _SegmentBtn("Done", false),
+              ],
+            ),
+          )
         ],
+      ),
+    );
+  }
+}
+class _SegmentBtn extends StatelessWidget {
+  final String text;
+  final bool selected;
+
+  const _SegmentBtn(this.text, this.selected);
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: selected ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Center(child: Text(text)),
       ),
     );
   }

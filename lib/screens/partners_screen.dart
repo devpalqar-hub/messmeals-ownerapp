@@ -1,157 +1,206 @@
 import 'package:flutter/material.dart';
-import '../service/api_service.dart';
-import 'add_partner_screen.dart';
-import 'partner_details_screen.dart';
 
-class PartnersScreen extends StatefulWidget {
-  final String? messId;
-
-  const PartnersScreen({super.key, this.messId});
-
-  @override
-  State<PartnersScreen> createState() => _PartnersScreenState();
-}
-
-class _PartnersScreenState extends State<PartnersScreen> {
-  List<dynamic> partners = [];
-  bool isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    fetchPartners();
-  }
-
-  @override
-  void didUpdateWidget(covariant PartnersScreen oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.messId != widget.messId && widget.messId != null) {
-      fetchPartners();
-    }
-  }
-
-  Future<void> fetchPartners() async {
-    if (widget.messId == null) return;
-
-    try {
-      setState(() => isLoading = true);
-
-      final response = await ApiService.getPartners(widget.messId!);
-      partners = response["data"] ?? [];
-
-      debugPrint("Partners fetched for mess: ${widget.messId}");
-    } catch (e) {
-      debugPrint("Partners fetch error: $e");
-    } finally {
-      setState(() => isLoading = false);
-    }
-  }
+class PartnersScreen extends StatelessWidget {
+  const PartnersScreen({super.key, String? messId});
 
   @override
   Widget build(BuildContext context) {
-    if (widget.messId == null) {
-      return const Center(child: Text("Select a mess"));
-    }
-
-    if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
     return Scaffold(
       backgroundColor: const Color(0xffF5F6FA),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// Header
+              /// HEADER
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    "${partners.length} Partners",
-                    style: const TextStyle(
-                        fontSize: 22, fontWeight: FontWeight.w600),
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Partners",
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        "3 delivery partners",
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ],
                   ),
                   ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              AddPartnerScreen(messId: widget.messId!),
-                        ),
-                      ).then((_) => fetchPartners());
-                    },
-                    icon: const Icon(Icons.add, size: 18),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xff3B6EA5),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: () {},
+                    icon: const Icon(Icons.add),
                     label: const Text("Add"),
                   )
                 ],
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
 
-              /// List
-              Expanded(
-                child: partners.isEmpty
-                    ? const Center(child: Text("No partners found"))
-                    : ListView.builder(
-                  itemCount: partners.length,
-                  itemBuilder: (_, index) {
-                    final partner = partners[index];
+              /// SEARCH
+              TextField(
+                decoration: InputDecoration(
+                  hintText: "Search customers...",
+                  prefixIcon: const Icon(Icons.search),
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
 
-                    return InkWell(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => PartnerDetailsScreen(
-                              messId: widget.messId!,
-                              partnerId: partner["id"]?.toString(),
-                              name: partner["name"] ?? "",
-                              phone: partner["phone"] ?? "",
-                              email: partner["email"] ?? "",
-                              address: partner["location"] ?? "",
-                            ),
-                          ),
-                        ).then((_) => fetchPartners());
-                      },
-                      child: Container(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border:
-                          Border.all(color: Colors.grey.shade300),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              partner["name"] ?? "",
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              partner["phone"] ?? "",
-                              style:
-                              const TextStyle(color: Colors.grey),
-                            ),
-                          ],
-                        ),
+              const SizedBox(height: 16),
+
+              /// LIST
+              const Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      PartnerCard(
+                        name: "Ravi Kumar",
+                        phone: "+91 98765 11111",
+                        email: "ravi@example.com",
+                        deliveries: "245",
+                        location: "Bangalore",
+                        isActive: true,
                       ),
-                    );
-                  },
+                      PartnerCard(
+                        name: "Suresh Patil",
+                        phone: "+91 98765 22222",
+                        email: "suresh@example.com",
+                        deliveries: "189",
+                        location: "Bangalore",
+                        isActive: true,
+                      ),
+                      PartnerCard(
+                        name: "Vijay Reddy",
+                        phone: "+91 98765 33333",
+                        email: "",
+                        deliveries: "156",
+                        location: "",
+                        isActive: false,
+                      ),
+                    ],
+                  ),
                 ),
               )
             ],
           ),
         ),
       ),
+    );
+  }
+}
+class PartnerCard extends StatelessWidget {
+  final String name;
+  final String phone;
+  final String email;
+  final String deliveries;
+  final String location;
+  final bool isActive;
+
+  const PartnerCard({
+    super.key,
+    required this.name,
+    required this.phone,
+    required this.email,
+    required this.deliveries,
+    required this.location,
+    required this.isActive,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          /// NAME + STATUS
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  name,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+              ),
+              Container(
+                padding:
+                const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: isActive ? Colors.black : Colors.grey,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  isActive ? "active" : "inactive",
+                  style: const TextStyle(color: Colors.white, fontSize: 12),
+                ),
+              ),
+              const SizedBox(width: 6),
+              const Icon(Icons.edit_outlined, size: 18),
+              const SizedBox(width: 10),
+              const Icon(Icons.delete_outline, size: 18),
+              const SizedBox(width: 6),
+              const Icon(Icons.chevron_right),
+            ],
+          ),
+
+          const SizedBox(height: 6),
+
+          /// PHONE + EMAIL
+          Text(phone, style: const TextStyle(color: Colors.grey)),
+          if (email.isNotEmpty)
+            Text(email, style: const TextStyle(color: Colors.grey)),
+
+          const SizedBox(height: 10),
+          const Divider(),
+
+          /// FOOTER
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _infoColumn("TOTAL DELIVERIES", deliveries),
+              _infoColumn("LOCATION", location),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _infoColumn(String title, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title,
+            style: const TextStyle(fontSize: 11, color: Colors.grey)),
+        const SizedBox(height: 2),
+        Text(value,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
+      ],
     );
   }
 }
